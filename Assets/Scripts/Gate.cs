@@ -11,8 +11,12 @@ public class Gate : MonoBehaviour
         if (used) return;
         if (!other.CompareTag("Player")) return;
 
+        Crowd crowd = other.GetComponent<Crowd>();
+        if (crowd == null) return;
+
         used = true;
-        Debug.Log($"Gate passed: +{value}");
+        crowd.Add(value);
+        Debug.Log($"Gate passed: +{value}, crowd now {crowd.Count}");
         gameObject.SetActive(false);
     }
 }
