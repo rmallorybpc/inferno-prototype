@@ -10,6 +10,7 @@ public class PlayerRunner : MonoBehaviour
     private float targetX;
     private bool isDragging;
     private float lastPointerX;
+    private bool steeringLocked;
 
     private void Start()
     {
@@ -20,6 +21,12 @@ public class PlayerRunner : MonoBehaviour
     {
         ReadDrag();
         Move();
+    }
+
+    public void SetSteeringLocked(bool locked)
+    {
+        steeringLocked = locked;
+        if (locked) targetX = transform.position.x;
     }
 
     private void ReadDrag()
@@ -44,6 +51,8 @@ public class PlayerRunner : MonoBehaviour
 
         float deltaPixels = pointerX - lastPointerX;
         lastPointerX = pointerX;
+
+        if (steeringLocked) return;
 
         float deltaWorld = deltaPixels / Screen.width * laneLimit * 2f;
         targetX = Mathf.Clamp(targetX + deltaWorld, -laneLimit, laneLimit);

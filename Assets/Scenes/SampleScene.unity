@@ -588,7 +588,7 @@ GameObject:
   - component: {fileID: 1101615689}
   m_Layer: 0
   m_Name: CombatZone
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -985,6 +985,7 @@ MonoBehaviour:
   spacing: 0.6
   followerHeight: -0.5
   regroupSpeed: 6
+  heroHealth: 5
 --- !u!1 &2053311405
 GameObject:
   m_ObjectHideFlags: 0

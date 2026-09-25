@@ -3,6 +3,8 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private float speed = 3f;
+    [SerializeField] private float rushSpeed = 10f;
+    [SerializeField] private float engageRange = 15f;
 
     private Transform target;
     private bool spent;
@@ -20,9 +22,11 @@ public class Enemy : MonoBehaviour
         Vector3 direction = target.position - transform.position;
         direction.y = 0f;
 
-        if (direction.sqrMagnitude < 0.01f) return;
+        float distance = direction.magnitude;
+        if (distance < 0.1f) return;
 
-        transform.position += direction.normalized * speed * Time.deltaTime;
+        float currentSpeed = distance < engageRange ? rushSpeed : speed;
+        transform.position += direction / distance * currentSpeed * Time.deltaTime;
     }
 
     private void OnTriggerEnter(Collider other)
