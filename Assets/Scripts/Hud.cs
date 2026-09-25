@@ -11,6 +11,7 @@ public class Hud : MonoBehaviour
     [SerializeField] private float restartDelay = 1f;
 
     private Crowd crowd;
+    private Experience experience;
     private TrackSpawner spawner;
     private TextMeshProUGUI statusText;
     private TextMeshProUGUI progressText;
@@ -22,6 +23,7 @@ public class Hud : MonoBehaviour
     {
         crowd = FindFirstObjectByType<Crowd>();
         spawner = FindFirstObjectByType<TrackSpawner>();
+        if (crowd != null) experience = crowd.GetComponent<Experience>();
         BuildCanvas();
     }
 
@@ -36,15 +38,20 @@ public class Hud : MonoBehaviour
         int seconds = (int)(runTime % 60f);
         string time = $"{minutes}:{seconds:00}";
 
+        string levelLine = experience != null
+            ? $"\nLevel {experience.Level}  XP {experience.Current}/{experience.Required}"
+            : "";
+
         statusText.text = $"{heroName}  Health {crowd.HeroHealth}\nCrowd {crowd.Followers.Count}";
-        progressText.text = $"Segment {segment}\n{time}";
+        progressText.text = $"Segment {segment}\n{time}{levelLine}";
 
         if (!crowd.IsDefeated) return;
 
         if (!centerText.gameObject.activeSelf)
         {
+            string levelReached = experience != null ? $", level {experience.Level}" : "";
             centerText.gameObject.SetActive(true);
-            centerText.text = $"Run over\nSegment {segment}, {time}\n\nTap to restart";
+            centerText.text = $"Run over\nSegment {segment}, {time}{levelReached}\n\nTap to restart";
         }
 
         defeatedTime += Time.deltaTime;
@@ -72,7 +79,7 @@ public class Hud : MonoBehaviour
             TextAlignmentOptions.TopLeft);
 
         progressText = CreateText(canvas.transform, "Progress",
-            new Vector2(1f, 1f), new Vector2(-40f, -40f), new Vector2(500f, 200f),
+            new Vector2(1f, 1f), new Vector2(-40f, -40f), new Vector2(600f, 260f),
             TextAlignmentOptions.TopRight);
 
         centerText = CreateText(canvas.transform, "Center",

@@ -3,12 +3,14 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private int health = 1;
+    [SerializeField] private int experienceValue = 1;
     [SerializeField] private float speed = 3f;
     [SerializeField] private float rushSpeed = 10f;
     [SerializeField] private float trackingSpeed = 16f;
     [SerializeField] private float engageRange = 15f;
 
     private Transform target;
+    private Experience experience;
     private float spreadOffset;
     private float speedMultiplier = 1f;
     private bool spent;
@@ -31,14 +33,17 @@ public class Enemy : MonoBehaviour
         if (health > 0) return;
 
         spent = true;
-        Debug.Log("Enemy killed");
+        if (experience != null) experience.Add(experienceValue);
         Destroy(gameObject);
     }
 
     private void Start()
     {
         Crowd crowd = FindFirstObjectByType<Crowd>();
-        if (crowd != null) target = crowd.transform;
+        if (crowd == null) return;
+
+        target = crowd.transform;
+        experience = crowd.GetComponent<Experience>();
     }
 
     private void Update()

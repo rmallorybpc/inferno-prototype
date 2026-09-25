@@ -639,6 +639,7 @@ GameObject:
   - component: {fileID: 2035930168}
   - component: {fileID: 2035930170}
   - component: {fileID: 2035930171}
+  - component: {fileID: 2035930172}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -816,6 +817,20 @@ MonoBehaviour:
   fireInterval: 0.5
   fireHeight: 0.5
   muzzleForward: 0.6
+--- !u!114 &2035930172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035930162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f066da41a97befd4d9162fee8e3d1ec8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Experience
+  baseRequirement: 5
+  requirementPerLevel: 3
 --- !u!1 &2060795466
 GameObject:
   m_ObjectHideFlags: 0
@@ -845,6 +860,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6ff0a14a742f734b948738aa9d609a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hud
+  heroName: Hero
   fontSize: 48
   restartDelay: 1
 --- !u!4 &2060795468
