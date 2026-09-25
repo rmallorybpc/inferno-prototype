@@ -10,11 +10,17 @@ public class Enemy : MonoBehaviour
 
     private Transform target;
     private float spreadOffset;
+    private float speedMultiplier = 1f;
     private bool spent;
 
     public void SetSpread(float offset)
     {
         spreadOffset = offset;
+    }
+
+    public void SetSpeedMultiplier(float multiplier)
+    {
+        speedMultiplier = multiplier;
     }
 
     public void TakeDamage(int amount)
@@ -51,8 +57,8 @@ public class Enemy : MonoBehaviour
         float spread = spreadOffset * Mathf.Clamp01((distance - 2f) / engageRange);
         float aimX = goal.x + spread;
 
-        float lateralSpeed = engaged ? trackingSpeed : speed;
-        float forwardSpeed = engaged ? rushSpeed : speed;
+        float lateralSpeed = (engaged ? trackingSpeed : speed) * speedMultiplier;
+        float forwardSpeed = (engaged ? rushSpeed : speed) * speedMultiplier;
 
         position.x = Mathf.MoveTowards(position.x, aimX, lateralSpeed * Time.deltaTime);
         position.z = Mathf.MoveTowards(position.z, goal.z, forwardSpeed * Time.deltaTime);
