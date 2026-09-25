@@ -9,12 +9,20 @@ public class Crowd : MonoBehaviour
     [SerializeField] private float spacing = 0.6f;
     [SerializeField] private float followerHeight = -0.5f;
     [SerializeField] private float regroupSpeed = 6f;
+    [SerializeField] private int heroHealth = 5;
 
     private readonly List<Transform> followers = new List<Transform>();
     private readonly List<Vector3> targets = new List<Vector3>();
     private Formation formation = Formation.Behind;
+    private PlayerRunner runner;
 
     public int Count => followers.Count + 1;
+    public bool IsDefeated => heroHealth <= 0;
+
+    private void Awake()
+    {
+        runner = GetComponent<PlayerRunner>();
+    }
 
     public void Add(int amount)
     {
@@ -40,6 +48,34 @@ public class Crowd : MonoBehaviour
         formation = newFormation;
         Arrange();
         Debug.Log($"Formation: {formation}");
+    }
+
+    public void TakeHit(Transform struck)
+    {
+        if (IsDefeated) return;
+
+        if (followers.Count > 0)
+        {
+            int index = followers.IndexOf(struck);
+            if (index < 0) index = followers.Count - 1;
+
+            Destroy(followers[index].gameObject);
+            followers.RemoveAt(index);
+            targets.RemoveAt(index);
+            Arrange();
+
+            Debug.Log($"Follower lost, crowd now {Count}");
+            return;
+        }
+
+        heroHealth--;
+        Debug.Log($"Hero hit, health {heroHealth}");
+
+        if (IsDefeated)
+        {
+            Debug.Log("Run over");
+            if (runner != null) runner.enabled = false;
+        }
     }
 
     private void Update()
