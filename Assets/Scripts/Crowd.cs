@@ -18,6 +18,7 @@ public class Crowd : MonoBehaviour
 
     public int Count => followers.Count + 1;
     public bool IsDefeated => heroHealth <= 0;
+    public IReadOnlyList<Transform> Followers => followers;
 
     private void Awake()
     {

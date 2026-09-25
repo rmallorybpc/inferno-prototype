@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    [SerializeField] private int health = 1;
     [SerializeField] private float speed = 3f;
     [SerializeField] private float rushSpeed = 10f;
     [SerializeField] private float trackingSpeed = 16f;
@@ -14,6 +15,18 @@ public class Enemy : MonoBehaviour
     public void SetSpread(float offset)
     {
         spreadOffset = offset;
+    }
+
+    public void TakeDamage(int amount)
+    {
+        if (spent) return;
+
+        health -= amount;
+        if (health > 0) return;
+
+        spent = true;
+        Debug.Log("Enemy killed");
+        Destroy(gameObject);
     }
 
     private void Start()

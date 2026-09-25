@@ -649,6 +649,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f749826faac2f08409a0b407ec48a4e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CombatZone
+  lockSteering: 0
 --- !u!1 &1183309301
 GameObject:
   m_ObjectHideFlags: 0
@@ -825,6 +826,7 @@ GameObject:
   - component: {fileID: 2035930167}
   - component: {fileID: 2035930168}
   - component: {fileID: 2035930170}
+  - component: {fileID: 2035930171}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -986,6 +988,22 @@ MonoBehaviour:
   followerHeight: -0.5
   regroupSpeed: 6
   heroHealth: 5
+--- !u!114 &2035930171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035930162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f416a98ac2e7b04f92044356a80daaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Shooter
+  projectilePrefab: {fileID: 1618953311171187308, guid: 6b5c62434c032854d95950530cbfadbc, type: 3}
+  fireInterval: 0.5
+  fireHeight: 0.5
+  muzzleForward: 0.6
 --- !u!1 &2053311405
 GameObject:
   m_ObjectHideFlags: 0
