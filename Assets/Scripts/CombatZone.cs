@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class CombatZone : MonoBehaviour
 {
+    [SerializeField] private bool lockSteering = false;
+
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
@@ -25,9 +27,9 @@ public class CombatZone : MonoBehaviour
         PlayerRunner runner = player.GetComponent<PlayerRunner>();
         if (runner != null)
         {
-            runner.SetSteeringLocked(active);
+            runner.SetSteeringLocked(active && lockSteering);
         }
 
-        Debug.Log(active ? "Combat started, steering locked" : "Combat ended, steering unlocked");
+        Debug.Log(active ? "Combat started" : "Combat ended");
     }
 }

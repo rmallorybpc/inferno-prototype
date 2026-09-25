@@ -16,7 +16,10 @@ public class EnemyWave : MonoBehaviour
             float x = (column - (columns - 1) * 0.5f) * spacing;
 
             Vector3 position = transform.position + new Vector3(x, 0f, row * spacing);
-            Instantiate(enemyPrefab, position, Quaternion.identity);
+            GameObject spawned = Instantiate(enemyPrefab, position, Quaternion.identity);
+
+            Enemy enemy = spawned.GetComponent<Enemy>();
+            if (enemy != null) enemy.SetSpread(x);
         }
     }
 }
