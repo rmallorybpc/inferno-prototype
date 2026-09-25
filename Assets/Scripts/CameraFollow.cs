@@ -8,7 +8,12 @@ public class CameraFollow : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (target == null) return;
+        if (target == null)
+        {
+            Debug.LogWarning("CameraFollow has no target assigned.");
+            enabled = false;
+            return;
+        }
 
         Vector3 position = target.position + offset;
         position.x = target.position.x * lateralFollow + offset.x;

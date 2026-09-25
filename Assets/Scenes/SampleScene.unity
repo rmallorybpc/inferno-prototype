@@ -395,7 +395,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8929a34321f691c4c800d2c32d594ee4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
-  target: {fileID: 0}
+  target: {fileID: 2035930166}
   offset: {x: 0, y: 4, z: -8}
   lateralFollow: 0
 --- !u!1 &410087039
