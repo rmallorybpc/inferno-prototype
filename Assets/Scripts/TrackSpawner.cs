@@ -12,6 +12,11 @@ public class TrackSpawner : MonoBehaviour
     private Transform player;
     private int nextIndex;
 
+    public int SegmentAt(float z)
+    {
+        return Mathf.Max(0, Mathf.FloorToInt((z - startZ) / segmentLength));
+    }
+
     private void Start()
     {
         Crowd crowd = FindFirstObjectByType<Crowd>();
