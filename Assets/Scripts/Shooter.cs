@@ -4,11 +4,31 @@ public class Shooter : MonoBehaviour
 {
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private float fireInterval = 0.5f;
+    [SerializeField] private float minFireInterval = 0.1f;
+    [SerializeField] private int damage = 1;
+    [SerializeField] private int shotsPerShooter = 1;
+    [SerializeField] private float spreadAngle = 8f;
     [SerializeField] private float fireHeight = 0.5f;
     [SerializeField] private float muzzleForward = 0.6f;
 
     private Crowd crowd;
     private float timer;
+
+    public void ImproveFireRate(float fraction)
+    {
+        fireInterval = Mathf.Max(minFireInterval, fireInterval * (1f - fraction));
+        Debug.Log($"Fire interval now {fireInterval:0.00}s");
+    }
+
+    public void AddDamage(int amount)
+    {
+        damage += amount;
+    }
+
+    public void AddShots(int amount)
+    {
+        shotsPerShooter += amount;
+    }
 
     private void Awake()
     {
@@ -40,6 +60,14 @@ public class Shooter : MonoBehaviour
             fireHeight,
             shooter.position.z + muzzleForward);
 
-        Instantiate(projectilePrefab, origin, Quaternion.identity);
+        for (int i = 0; i < shotsPerShooter; i++)
+        {
+            float angle = (i - (shotsPerShooter - 1) * 0.5f) * spreadAngle;
+            Quaternion rotation = Quaternion.Euler(0f, angle, 0f);
+
+            GameObject shot = Instantiate(projectilePrefab, origin, rotation);
+            Projectile projectile = shot.GetComponent<Projectile>();
+            if (projectile != null) projectile.SetDamage(damage);
+        }
     }
 }

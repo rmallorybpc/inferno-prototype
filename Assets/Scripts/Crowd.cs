@@ -45,6 +45,14 @@ public class Crowd : MonoBehaviour
         }
     }
 
+    public void Heal(int amount)
+    {
+        if (IsDefeated) return;
+
+        heroHealth += amount;
+        Debug.Log($"Hero healed, health {heroHealth}");
+    }
+
     public void SetFormation(Formation newFormation)
     {
         if (formation == newFormation) return;

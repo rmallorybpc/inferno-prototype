@@ -8,6 +8,11 @@ public class Projectile : MonoBehaviour
 
     private bool spent;
 
+    public void SetDamage(int amount)
+    {
+        damage = amount;
+    }
+
     private void Start()
     {
         Destroy(gameObject, lifetime);
@@ -15,7 +20,7 @@ public class Projectile : MonoBehaviour
 
     private void Update()
     {
-        transform.position += Vector3.forward * speed * Time.deltaTime;
+        transform.position += transform.forward * speed * Time.deltaTime;
     }
 
     private void OnTriggerEnter(Collider other)
