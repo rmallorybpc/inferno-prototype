@@ -12,6 +12,7 @@ public class Hud : MonoBehaviour
 
     private Crowd crowd;
     private Experience experience;
+    private Shooter shooter;
     private TrackSpawner spawner;
     private TextMeshProUGUI statusText;
     private TextMeshProUGUI progressText;
@@ -23,7 +24,13 @@ public class Hud : MonoBehaviour
     {
         crowd = FindFirstObjectByType<Crowd>();
         spawner = FindFirstObjectByType<TrackSpawner>();
-        if (crowd != null) experience = crowd.GetComponent<Experience>();
+
+        if (crowd != null)
+        {
+            experience = crowd.GetComponent<Experience>();
+            shooter = crowd.GetComponent<Shooter>();
+        }
+
         BuildCanvas();
     }
 
@@ -42,8 +49,16 @@ public class Hud : MonoBehaviour
             ? $"\nLevel {experience.Level}  XP {experience.Current}/{experience.Required}"
             : "";
 
+        string fireLines = "";
+        if (shooter != null)
+        {
+            string max = shooter.IsFireRateMaxed ? "  MAX" : "";
+            fireLines = $"\nFire {shooter.VolleysPerSecond:0.0}/s{max}" +
+                        $"\nVolley {shooter.LastVolleyShots}  Dmg {shooter.LastShotDamage}";
+        }
+
         statusText.text = $"{heroName}  Health {crowd.HeroHealth}\nCrowd {crowd.Followers.Count}";
-        progressText.text = $"Segment {segment}\n{time}{levelLine}";
+        progressText.text = $"Segment {segment}\n{time}{levelLine}{fireLines}";
 
         if (!crowd.IsDefeated) return;
 
@@ -79,7 +94,7 @@ public class Hud : MonoBehaviour
             TextAlignmentOptions.TopLeft);
 
         progressText = CreateText(canvas.transform, "Progress",
-            new Vector2(1f, 1f), new Vector2(-40f, -40f), new Vector2(600f, 260f),
+            new Vector2(1f, 1f), new Vector2(-40f, -40f), new Vector2(600f, 380f),
             TextAlignmentOptions.TopRight);
 
         centerText = CreateText(canvas.transform, "Center",

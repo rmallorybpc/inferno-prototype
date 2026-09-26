@@ -16,6 +16,11 @@ public class Shooter : MonoBehaviour
     private float timer;
     private int volleyCount;
 
+    public float VolleysPerSecond => 1f / fireInterval;
+    public bool IsFireRateMaxed => fireInterval <= minFireInterval + 0.0001f;
+    public int LastVolleyShots { get; private set; }
+    public int LastShotDamage { get; private set; }
+
     public void ImproveFireRate(float fraction)
     {
         fireInterval = Mathf.Max(minFireInterval, fireInterval * (1f - fraction));
@@ -35,6 +40,8 @@ public class Shooter : MonoBehaviour
     private void Awake()
     {
         crowd = GetComponent<Crowd>();
+        LastVolleyShots = shotsPerShooter;
+        LastShotDamage = damage;
     }
 
     private void Update()
@@ -63,6 +70,9 @@ public class Shooter : MonoBehaviour
             {
                 Fire(ShooterAt(i), damage);
             }
+
+            LastVolleyShots = shooterCount * shotsPerShooter;
+            LastShotDamage = damage;
             return;
         }
 
@@ -75,6 +85,9 @@ public class Shooter : MonoBehaviour
             int index = Mathf.FloorToInt((k + phase) * step) % shooterCount;
             Fire(ShooterAt(index), scaledDamage);
         }
+
+        LastVolleyShots = maxShooters * shotsPerShooter;
+        LastShotDamage = scaledDamage;
     }
 
     private Transform ShooterAt(int index)

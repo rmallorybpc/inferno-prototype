@@ -16,3 +16,5 @@ MonoBehaviour:
   description: One more shot per volley
   type: 2
   amount: 1
+  maxPicks: 4
+  isFallback: 0

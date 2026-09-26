@@ -11,7 +11,9 @@ public class LevelUpScreen : MonoBehaviour
     [SerializeField] private float fontSize = 44f;
 
     private readonly List<UpgradeData> pool = new List<UpgradeData>();
+    private readonly List<UpgradeData> fallbacks = new List<UpgradeData>();
     private readonly List<UpgradeData> offered = new List<UpgradeData>();
+    private readonly Dictionary<UpgradeData, int> picks = new Dictionary<UpgradeData, int>();
     private readonly List<Button> cardButtons = new List<Button>();
     private readonly List<TextMeshProUGUI> cardTexts = new List<TextMeshProUGUI>();
 
@@ -23,7 +25,12 @@ public class LevelUpScreen : MonoBehaviour
 
     private void Start()
     {
-        pool.AddRange(Resources.LoadAll<UpgradeData>("Upgrades"));
+        foreach (UpgradeData upgrade in Resources.LoadAll<UpgradeData>("Upgrades"))
+        {
+            if (upgrade.isFallback) fallbacks.Add(upgrade);
+            else pool.Add(upgrade);
+        }
+
         if (pool.Count == 0) Debug.LogWarning("No upgrades found in Resources/Upgrades.");
 
         crowd = FindFirstObjectByType<Crowd>();
@@ -47,16 +54,49 @@ public class LevelUpScreen : MonoBehaviour
 
     private void OnLeveledUp(int level)
     {
-        if (pool.Count == 0) return;
-
         pending++;
         if (!panel.activeSelf) ShowCards();
     }
 
+    private int PicksOf(UpgradeData upgrade)
+    {
+        return picks.TryGetValue(upgrade, out int count) ? count : 0;
+    }
+
+    private bool IsAvailable(UpgradeData upgrade)
+    {
+        if (upgrade.maxPicks > 0 && PicksOf(upgrade) >= upgrade.maxPicks) return false;
+
+        switch (upgrade.type)
+        {
+            case UpgradeType.FireRate:
+                return shooter == null || !shooter.IsFireRateMaxed;
+            case UpgradeType.Recruit:
+                return crowd == null || !crowd.IsFull;
+            default:
+                return true;
+        }
+    }
+
     private void ShowCards()
     {
+        List<UpgradeData> candidates = new List<UpgradeData>();
+        foreach (UpgradeData upgrade in pool)
+        {
+            if (IsAvailable(upgrade)) candidates.Add(upgrade);
+        }
+
+        if (candidates.Count == 0) candidates.AddRange(fallbacks);
+
+        if (candidates.Count == 0)
+        {
+            pending = 0;
+            panel.SetActive(false);
+            Time.timeScale = 1f;
+            return;
+        }
+
         offered.Clear();
-        List<UpgradeData> candidates = new List<UpgradeData>(pool);
         int count = Mathf.Min(choices, candidates.Count);
 
         for (int i = 0; i < count; i++)
@@ -71,21 +111,29 @@ public class LevelUpScreen : MonoBehaviour
             bool visible = i < offered.Count;
             cardButtons[i].gameObject.SetActive(visible);
 
-            if (visible)
-            {
-                cardTexts[i].text = $"<b>{offered[i].title}</b>\n<size=70%>{offered[i].description}</size>";
-            }
+            if (visible) cardTexts[i].text = CardText(offered[i]);
         }
 
         panel.SetActive(true);
         Time.timeScale = 0f;
     }
 
+    private string CardText(UpgradeData upgrade)
+    {
+        string rank = upgrade.maxPicks > 0
+            ? $"  {PicksOf(upgrade) + 1}/{upgrade.maxPicks}"
+            : "";
+
+        return $"<b>{upgrade.title}</b>{rank}\n<size=70%>{upgrade.description}</size>";
+    }
+
     private void Choose(int index)
     {
         if (index >= offered.Count) return;
 
-        Apply(offered[index]);
+        UpgradeData chosen = offered[index];
+        picks[chosen] = PicksOf(chosen) + 1;
+        Apply(chosen);
         pending--;
 
         if (pending > 0)

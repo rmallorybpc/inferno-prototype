@@ -21,6 +21,7 @@ public class Crowd : MonoBehaviour
     public int Count => followers.Count + 1;
     public int HeroHealth => heroHealth;
     public bool IsDefeated => heroHealth <= 0;
+    public bool IsFull => followers.Count >= maxFollowers;
     public IReadOnlyList<Transform> Followers => followers;
 
     private void Awake()

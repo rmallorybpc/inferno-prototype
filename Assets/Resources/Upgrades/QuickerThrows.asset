@@ -16,3 +16,5 @@ MonoBehaviour:
   description: Fire 15% faster
   type: 0
   amount: 0.15
+  maxPicks: 10
+  isFallback: 0

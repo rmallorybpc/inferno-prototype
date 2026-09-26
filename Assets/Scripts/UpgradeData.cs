@@ -9,4 +9,10 @@ public class UpgradeData : ScriptableObject
     [TextArea] public string description = "";
     public UpgradeType type;
     public float amount = 1f;
+
+    [Tooltip("How many times this card can be taken in one run. 0 means no limit.")]
+    public int maxPicks = 0;
+
+    [Tooltip("Only offered when every other card is maxed out.")]
+    public bool isFallback = false;
 }
