@@ -1,19 +1,41 @@
 using TMPro;
 using UnityEngine;
 
+public enum GateOperation { Add, Subtract, Multiply, Divide }
+
 public class Gate : MonoBehaviour
 {
+    [SerializeField] private GateOperation operation = GateOperation.Add;
     [SerializeField] private int value = 3;
     [SerializeField] private float labelHeight = 2.2f;
     [SerializeField] private float labelSize = 10f;
+    [SerializeField] private Color helpfulColor = new Color(0.3f, 0.6f, 1f);
+    [SerializeField] private Color harmfulColor = new Color(1f, 0.55f, 0.1f);
 
     private TextMeshPro label;
+    private Renderer gateRenderer;
     private bool used;
 
-    public int Value => value;
+    public string Label
+    {
+        get
+        {
+            switch (operation)
+            {
+                case GateOperation.Subtract: return $"-{value}";
+                case GateOperation.Multiply: return $"×{value}";
+                case GateOperation.Divide: return $"÷{value}";
+                default: return $"+{value}";
+            }
+        }
+    }
+
+    private bool IsHelpful => operation == GateOperation.Add || operation == GateOperation.Multiply;
 
     private void Awake()
     {
+        gateRenderer = GetComponent<Renderer>();
+
         GameObject labelObject = new GameObject("GateLabel");
         label = labelObject.AddComponent<TextMeshPro>();
         label.alignment = TextAlignmentOptions.Center;
@@ -23,18 +45,30 @@ public class Gate : MonoBehaviour
         labelObject.transform.SetParent(transform.parent, false);
         labelObject.transform.position = transform.position + Vector3.up * labelHeight;
 
-        UpdateLabel();
+        Refresh();
     }
 
-    public void SetValue(int newValue)
+    public void SetGate(GateOperation newOperation, int newValue)
     {
+        operation = newOperation;
         value = newValue;
-        UpdateLabel();
+        Refresh();
     }
 
-    private void UpdateLabel()
+    private void Refresh()
     {
-        if (label != null) label.text = $"+{value}";
+        Color color = IsHelpful ? helpfulColor : harmfulColor;
+
+        if (label != null)
+        {
+            label.text = Label;
+            label.color = color;
+        }
+
+        if (gateRenderer != null)
+        {
+            gateRenderer.material.color = color;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -46,8 +80,8 @@ public class Gate : MonoBehaviour
         if (crowd == null) return;
 
         used = true;
-        crowd.Add(value);
-        Debug.Log($"Gate passed: +{value}, crowd now {crowd.Count}");
+        crowd.ApplyGate(operation, value);
+        Debug.Log($"Gate passed: {Label}, crowd now {crowd.Count}");
 
         gameObject.SetActive(false);
         if (label != null) label.gameObject.SetActive(false);

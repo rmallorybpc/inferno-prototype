@@ -10,6 +10,7 @@ public class Crowd : MonoBehaviour
     [SerializeField] private float followerHeight = -0.5f;
     [SerializeField] private float regroupSpeed = 6f;
     [SerializeField] private int heroHealth = 5;
+    [SerializeField] private int maxFollowers = 150;
 
     private readonly List<Transform> followers = new List<Transform>();
     private readonly List<Vector3> targets = new List<Vector3>();
@@ -28,8 +29,39 @@ public class Crowd : MonoBehaviour
         heroRenderer = GetComponent<MeshRenderer>();
     }
 
+    public void ApplyGate(GateOperation operation, int value)
+    {
+        int total = Count;
+        int newTotal;
+
+        switch (operation)
+        {
+            case GateOperation.Subtract:
+                newTotal = total - value;
+                break;
+            case GateOperation.Multiply:
+                newTotal = total * value;
+                break;
+            case GateOperation.Divide:
+                newTotal = Mathf.CeilToInt(total / (float)value);
+                break;
+            default:
+                newTotal = total + value;
+                break;
+        }
+
+        int newFollowers = Mathf.Max(0, newTotal - 1);
+        int change = newFollowers - followers.Count;
+
+        if (change > 0) Add(change);
+        else if (change < 0) Remove(-change);
+    }
+
     public void Add(int amount)
     {
+        amount = Mathf.Min(amount, maxFollowers - followers.Count);
+        if (amount <= 0) return;
+
         for (int i = 0; i < amount; i++)
         {
             GameObject follower = Instantiate(followerPrefab, transform);
@@ -43,6 +75,21 @@ public class Crowd : MonoBehaviour
         {
             followers[i].localPosition = targets[i];
         }
+    }
+
+    public void Remove(int amount)
+    {
+        amount = Mathf.Min(amount, followers.Count);
+
+        for (int i = 0; i < amount; i++)
+        {
+            int last = followers.Count - 1;
+            Destroy(followers[last].gameObject);
+            followers.RemoveAt(last);
+            targets.RemoveAt(last);
+        }
+
+        Arrange();
     }
 
     public void Heal(int amount)

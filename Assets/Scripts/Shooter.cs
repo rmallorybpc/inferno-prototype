@@ -10,9 +10,11 @@ public class Shooter : MonoBehaviour
     [SerializeField] private float spreadAngle = 8f;
     [SerializeField] private float fireHeight = 0.5f;
     [SerializeField] private float muzzleForward = 0.6f;
+    [SerializeField] private int maxShotsPerSecond = 150;
 
     private Crowd crowd;
     private float timer;
+    private int volleyCount;
 
     public void ImproveFireRate(float fraction)
     {
@@ -43,17 +45,45 @@ public class Shooter : MonoBehaviour
         if (timer < fireInterval) return;
         timer -= fireInterval;
 
-        Fire(transform);
+        FireVolley();
+        volleyCount++;
+    }
 
-        if (crowd == null) return;
+    private void FireVolley()
+    {
+        int followerCount = crowd != null ? crowd.Followers.Count : 0;
+        int shooterCount = 1 + followerCount;
 
-        foreach (Transform follower in crowd.Followers)
+        int volleyBudget = Mathf.Max(1, Mathf.RoundToInt(maxShotsPerSecond * fireInterval));
+        int maxShooters = Mathf.Max(1, volleyBudget / shotsPerShooter);
+
+        if (shooterCount <= maxShooters)
         {
-            Fire(follower);
+            for (int i = 0; i < shooterCount; i++)
+            {
+                Fire(ShooterAt(i), damage);
+            }
+            return;
+        }
+
+        float step = shooterCount / (float)maxShooters;
+        int scaledDamage = Mathf.Max(1, Mathf.RoundToInt(damage * step));
+        float phase = (volleyCount * 0.37f) % 1f;
+
+        for (int k = 0; k < maxShooters; k++)
+        {
+            int index = Mathf.FloorToInt((k + phase) * step) % shooterCount;
+            Fire(ShooterAt(index), scaledDamage);
         }
     }
 
-    private void Fire(Transform shooter)
+    private Transform ShooterAt(int index)
+    {
+        if (index == 0 || crowd == null) return transform;
+        return crowd.Followers[index - 1];
+    }
+
+    private void Fire(Transform shooter, int shotDamage)
     {
         Vector3 origin = new Vector3(
             shooter.position.x,
@@ -67,7 +97,7 @@ public class Shooter : MonoBehaviour
 
             GameObject shot = Instantiate(projectilePrefab, origin, rotation);
             Projectile projectile = shot.GetComponent<Projectile>();
-            if (projectile != null) projectile.SetDamage(damage);
+            if (projectile != null) projectile.SetDamage(shotDamage);
         }
     }
 }
