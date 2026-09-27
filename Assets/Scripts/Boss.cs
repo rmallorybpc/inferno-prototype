@@ -6,6 +6,7 @@ public class Boss : MonoBehaviour
     [SerializeField] private string displayName = "BOSS";
     [SerializeField] private float approachSpeed = 4f;
     [SerializeField] private float trackingSpeed = 16f;
+    [SerializeField] private float holdDistance = 25f;
     [SerializeField] private float grindInterval = 0.5f;
     [SerializeField] private int hitsPerGrind = 3;
     [SerializeField] private int experienceValue = 20;
@@ -15,6 +16,7 @@ public class Boss : MonoBehaviour
     [SerializeField] private float labelSize = 14f;
 
     private Crowd crowd;
+    private PlayerRunner runner;
     private Experience experience;
     private LevelUpScreen levelUpScreen;
     private TextMeshPro label;
@@ -22,9 +24,8 @@ public class Boss : MonoBehaviour
     private int health = 1;
     private float speedMultiplier = 1f;
     private float touchingUntil;
-    private bool anchored;
-    private float anchorOffset;
     private float grindTimer;
+    private bool holding;
     private bool defeated;
 
     public void Configure(int newHealth, float newSpeedMultiplier)
@@ -64,7 +65,12 @@ public class Boss : MonoBehaviour
     {
         crowd = FindFirstObjectByType<Crowd>();
         levelUpScreen = FindFirstObjectByType<LevelUpScreen>();
-        if (crowd != null) experience = crowd.GetComponent<Experience>();
+
+        if (crowd != null)
+        {
+            runner = crowd.GetComponent<PlayerRunner>();
+            experience = crowd.GetComponent<Experience>();
+        }
 
         Vector3 position = transform.position;
         position.y = transform.localScale.y * 0.5f;
@@ -73,26 +79,34 @@ public class Boss : MonoBehaviour
 
     private void Update()
     {
-        if (defeated || crowd == null || crowd.IsDefeated) return;
-
-        crowd.SetFormation(Crowd.Formation.Ahead);
+        if (defeated || crowd == null) return;
 
         Vector3 position = transform.position;
         Vector3 goal = crowd.transform.position;
-        bool touching = Time.time < touchingUntil;
+        float step = approachSpeed * speedMultiplier * Time.deltaTime;
+
+        if (crowd.IsDefeated)
+        {
+            position.x = Mathf.MoveTowards(position.x, goal.x, step);
+            position.z = Mathf.MoveTowards(position.z, goal.z, step);
+            transform.position = position;
+            return;
+        }
+
+        crowd.SetFormation(Crowd.Formation.Ahead);
+
+        if (!holding && position.z - goal.z <= holdDistance)
+        {
+            holding = true;
+            if (runner != null) runner.SetHeld(true);
+        }
 
         position.x = Mathf.MoveTowards(position.x, goal.x, trackingSpeed * speedMultiplier * Time.deltaTime);
 
+        bool touching = Time.time < touchingUntil;
+
         if (touching)
         {
-            if (!anchored)
-            {
-                anchored = true;
-                anchorOffset = position.z - goal.z;
-            }
-
-            position.z = goal.z + anchorOffset;
-
             grindTimer += Time.deltaTime;
             while (grindTimer >= grindInterval)
             {
@@ -105,8 +119,7 @@ public class Boss : MonoBehaviour
         }
         else
         {
-            anchored = false;
-            position.z = Mathf.MoveTowards(position.z, goal.z, approachSpeed * speedMultiplier * Time.deltaTime);
+            position.z = Mathf.MoveTowards(position.z, goal.z, step);
         }
 
         transform.position = position;
@@ -128,6 +141,12 @@ public class Boss : MonoBehaviour
         touchingUntil = Time.time + 0.15f;
     }
 
+    private void OnDestroy()
+    {
+        if (runner != null) runner.SetHeld(false);
+        if (label != null) Destroy(label.gameObject);
+    }
+
     private void UpdateLabel()
     {
         if (label != null) label.text = $"<size=60%>{displayName}</size>\n{health}";
@@ -145,8 +164,6 @@ public class Boss : MonoBehaviour
         if (crowd != null) crowd.SetFormation(Crowd.Formation.Behind);
 
         Debug.Log($"Boss defeated, treasure x{picks}");
-
-        if (label != null) Destroy(label.gameObject);
         Destroy(gameObject);
     }
 }

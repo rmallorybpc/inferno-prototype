@@ -11,6 +11,7 @@ public class PlayerRunner : MonoBehaviour
     private bool isDragging;
     private float lastPointerX;
     private bool steeringLocked;
+    private bool held;
 
     private void Start()
     {
@@ -27,6 +28,11 @@ public class PlayerRunner : MonoBehaviour
     {
         steeringLocked = locked;
         if (locked) targetX = transform.position.x;
+    }
+
+    public void SetHeld(bool isHeld)
+    {
+        held = isHeld;
     }
 
     private void ReadDrag()
@@ -61,7 +67,7 @@ public class PlayerRunner : MonoBehaviour
     private void Move()
     {
         Vector3 position = transform.position;
-        position.z += forwardSpeed * Time.deltaTime;
+        if (!held) position.z += forwardSpeed * Time.deltaTime;
         position.x = Mathf.MoveTowards(position.x, targetX, strafeSpeed * Time.deltaTime);
         transform.position = position;
     }

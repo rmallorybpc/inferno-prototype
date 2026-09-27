@@ -60,7 +60,9 @@ public class TrackSpawner : MonoBehaviour
         Vector3 position = new Vector3(0f, 0f, segmentStart);
         Segment segment = Instantiate(segmentPrefab, position, Quaternion.identity);
 
-        float arrivalTime = segmentStart / runSpeed;
+        float playerZ = player != null ? player.position.z : 0f;
+        float arrivalTime = Time.timeSinceLevelLoad + (segmentStart - playerZ) / runSpeed;
+
         bool isBoss = bossPrefab != null &&
                       nextBoss < bossTimes.Length &&
                       arrivalTime >= bossTimes[nextBoss];
