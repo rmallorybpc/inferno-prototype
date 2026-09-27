@@ -21,7 +21,10 @@ public class LevelUpScreen : MonoBehaviour
     private Crowd crowd;
     private Shooter shooter;
     private GameObject panel;
-    private int pending;
+    private TextMeshProUGUI headingText;
+    private int levelPending;
+    private int treasurePending;
+    private int bossesDefeated;
 
     public bool TryGetLevel(UpgradeType type, out int level, out int maxLevel)
     {
@@ -37,6 +40,13 @@ public class LevelUpScreen : MonoBehaviour
         level = 1;
         maxLevel = 0;
         return false;
+    }
+
+    public void GrantTreasure(int picksGranted)
+    {
+        bossesDefeated++;
+        treasurePending += picksGranted;
+        if (!panel.activeSelf) ShowCards();
     }
 
     private void Start()
@@ -70,7 +80,7 @@ public class LevelUpScreen : MonoBehaviour
 
     private void OnLeveledUp(int level)
     {
-        pending++;
+        levelPending++;
         if (!panel.activeSelf) ShowCards();
     }
 
@@ -81,6 +91,7 @@ public class LevelUpScreen : MonoBehaviour
 
     private bool IsAvailable(UpgradeData upgrade)
     {
+        if (upgrade.unlockAfterBoss > bossesDefeated) return false;
         if (upgrade.maxPicks > 0 && PicksOf(upgrade) >= upgrade.maxPicks) return false;
 
         switch (upgrade.type)
@@ -92,6 +103,18 @@ public class LevelUpScreen : MonoBehaviour
             default:
                 return true;
         }
+    }
+
+    private bool HasNewUnlocks()
+    {
+        if (bossesDefeated == 0) return false;
+
+        foreach (UpgradeData upgrade in pool)
+        {
+            if (upgrade.unlockAfterBoss == bossesDefeated) return true;
+        }
+
+        return false;
     }
 
     private void ShowCards()
@@ -106,10 +129,21 @@ public class LevelUpScreen : MonoBehaviour
 
         if (candidates.Count == 0)
         {
-            pending = 0;
+            levelPending = 0;
+            treasurePending = 0;
             panel.SetActive(false);
             Time.timeScale = 1f;
             return;
+        }
+
+        if (treasurePending > 0)
+        {
+            string unlocked = HasNewUnlocks() ? "\n<size=55%>New upgrades unlocked</size>" : "";
+            headingText.text = $"Treasure  x{treasurePending}{unlocked}";
+        }
+        else
+        {
+            headingText.text = "Level up";
         }
 
         offered.Clear();
@@ -150,9 +184,11 @@ public class LevelUpScreen : MonoBehaviour
         UpgradeData chosen = offered[index];
         picks[chosen] = PicksOf(chosen) + 1;
         Apply(chosen);
-        pending--;
 
-        if (pending > 0)
+        if (treasurePending > 0) treasurePending--;
+        else levelPending--;
+
+        if (treasurePending + levelPending > 0)
         {
             ShowCards();
             return;
@@ -222,7 +258,7 @@ public class LevelUpScreen : MonoBehaviour
         panelRect.offsetMin = Vector2.zero;
         panelRect.offsetMax = Vector2.zero;
 
-        CreateLabel(panel.transform, "Level up", new Vector2(0f, 600f), new Vector2(900f, 150f), fontSize * 1.4f);
+        headingText = CreateLabel(panel.transform, "Level up", new Vector2(0f, 600f), new Vector2(900f, 220f), fontSize * 1.4f);
 
         for (int i = 0; i < choices; i++)
         {

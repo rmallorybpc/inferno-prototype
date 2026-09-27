@@ -38,8 +38,18 @@ public class Segment : MonoBehaviour
 
         int enemyCount = baseEnemyCount + enemiesPerSegment * index;
         int columns = Mathf.Min(3 + index / 2, 6);
-        float speedMultiplier = Mathf.Min(1f + speedStepPerSegment * index, maxSpeedMultiplier);
-        wave.Configure(enemyCount, columns, speedMultiplier);
+        wave.Configure(enemyCount, columns, SpeedFor(index));
+    }
+
+    public void ConfigureBoss(int index, GameObject bossPrefab, int bossHealth)
+    {
+        ConfigureGates(index);
+        wave.ConfigureBoss(bossPrefab, bossHealth, SpeedFor(index));
+    }
+
+    private float SpeedFor(int index)
+    {
+        return Mathf.Min(1f + speedStepPerSegment * index, maxSpeedMultiplier);
     }
 
     private void Start()

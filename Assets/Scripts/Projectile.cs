@@ -26,9 +26,17 @@ public class Projectile : MonoBehaviour
         if (damage <= 0) return;
 
         Enemy enemy = other.GetComponent<Enemy>();
-        if (enemy == null) return;
+        if (enemy != null)
+        {
+            damage -= enemy.TakeDamage(damage);
+        }
+        else
+        {
+            Boss boss = other.GetComponent<Boss>();
+            if (boss == null) return;
+            damage -= boss.TakeDamage(damage);
+        }
 
-        damage -= enemy.TakeDamage(damage);
         if (damage <= 0) Destroy(gameObject);
     }
 }

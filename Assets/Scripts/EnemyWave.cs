@@ -9,6 +9,8 @@ public class EnemyWave : MonoBehaviour
     [SerializeField] private float activationDistance = 65f;
 
     private float speedMultiplier = 1f;
+    private GameObject bossPrefab;
+    private int bossHealth;
     private Transform player;
     private bool spawned;
 
@@ -16,6 +18,13 @@ public class EnemyWave : MonoBehaviour
     {
         count = newCount;
         columns = newColumns;
+        speedMultiplier = newSpeedMultiplier;
+    }
+
+    public void ConfigureBoss(GameObject newBossPrefab, int health, float newSpeedMultiplier)
+    {
+        bossPrefab = newBossPrefab;
+        bossHealth = health;
         speedMultiplier = newSpeedMultiplier;
     }
 
@@ -31,7 +40,16 @@ public class EnemyWave : MonoBehaviour
         if (transform.position.z - player.position.z > activationDistance) return;
 
         spawned = true;
-        Spawn();
+
+        if (bossPrefab != null) SpawnBoss();
+        else Spawn();
+    }
+
+    private void SpawnBoss()
+    {
+        GameObject spawnedBoss = Instantiate(bossPrefab, transform.position, Quaternion.identity);
+        Boss boss = spawnedBoss.GetComponent<Boss>();
+        if (boss != null) boss.Configure(bossHealth, speedMultiplier);
     }
 
     private void Spawn()

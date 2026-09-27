@@ -15,4 +15,7 @@ public class UpgradeData : ScriptableObject
 
     [Tooltip("Only offered when every other card is maxed out.")]
     public bool isFallback = false;
+
+    [Tooltip("Hidden until this many bosses are defeated. 0 means available from the start.")]
+    public int unlockAfterBoss = 0;
 }
