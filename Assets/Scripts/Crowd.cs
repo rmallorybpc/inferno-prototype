@@ -30,7 +30,7 @@ public class Crowd : MonoBehaviour
         heroRenderer = GetComponent<MeshRenderer>();
     }
 
-    public void ApplyGate(GateOperation operation, int value)
+    public int PreviewGate(GateOperation operation, int value)
     {
         int total = Count;
         int newTotal;
@@ -51,7 +51,13 @@ public class Crowd : MonoBehaviour
                 break;
         }
 
-        int newFollowers = Mathf.Max(0, newTotal - 1);
+        int newFollowers = Mathf.Clamp(newTotal - 1, 0, maxFollowers);
+        return newFollowers + 1;
+    }
+
+    public void ApplyGate(GateOperation operation, int value)
+    {
+        int newFollowers = PreviewGate(operation, value) - 1;
         int change = newFollowers - followers.Count;
 
         if (change > 0) Add(change);
@@ -107,7 +113,6 @@ public class Crowd : MonoBehaviour
 
         formation = newFormation;
         Arrange();
-        Debug.Log($"Formation: {formation}");
     }
 
     public void TakeHit(Transform struck)
@@ -123,8 +128,6 @@ public class Crowd : MonoBehaviour
             followers.RemoveAt(index);
             targets.RemoveAt(index);
             Arrange();
-
-            Debug.Log($"Follower lost, crowd now {Count}");
             return;
         }
 

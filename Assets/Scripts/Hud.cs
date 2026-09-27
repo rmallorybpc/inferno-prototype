@@ -14,6 +14,7 @@ public class Hud : MonoBehaviour
     private Experience experience;
     private Shooter shooter;
     private TrackSpawner spawner;
+    private LevelUpScreen levelUpScreen;
     private TextMeshProUGUI statusText;
     private TextMeshProUGUI progressText;
     private TextMeshProUGUI centerText;
@@ -24,6 +25,7 @@ public class Hud : MonoBehaviour
     {
         crowd = FindFirstObjectByType<Crowd>();
         spawner = FindFirstObjectByType<TrackSpawner>();
+        levelUpScreen = FindFirstObjectByType<LevelUpScreen>();
 
         if (crowd != null)
         {
@@ -49,16 +51,13 @@ public class Hud : MonoBehaviour
             ? $"\nLevel {experience.Level}  XP {experience.Current}/{experience.Required}"
             : "";
 
-        string fireLines = "";
-        if (shooter != null)
-        {
-            string max = shooter.IsFireRateMaxed ? "  MAX" : "";
-            fireLines = $"\nFire {shooter.VolleysPerSecond:0.0}/s{max}" +
-                        $"\nVolley {shooter.LastVolleyShots}  Dmg {shooter.LastShotDamage}";
-        }
+        bool fireMaxed = shooter != null && shooter.IsFireRateMaxed;
+        string fireLine = "\n" + UpgradeLine("Fire", UpgradeType.FireRate, fireMaxed);
+        string volleyLine = "\n" + UpgradeLine("Volley", UpgradeType.ExtraShot, false);
 
-        statusText.text = $"{heroName}  Health {crowd.HeroHealth}\nCrowd {crowd.Followers.Count}";
-        progressText.text = $"Segment {segment}\n{time}{levelLine}{fireLines}";
+        string crowdMax = crowd.IsFull ? "  MAX" : "";
+        statusText.text = $"{heroName}  Health {crowd.HeroHealth}\nCrowd {crowd.Followers.Count}{crowdMax}";
+        progressText.text = $"Segment {segment}\n{time}{levelLine}{fireLine}{volleyLine}";
 
         if (!crowd.IsDefeated) return;
 
@@ -76,6 +75,17 @@ public class Hud : MonoBehaviour
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
+    }
+
+    private string UpgradeLine(string label, UpgradeType type, bool forceMax)
+    {
+        if (levelUpScreen == null || !levelUpScreen.TryGetLevel(type, out int level, out int maxLevel))
+        {
+            return $"{label} Lv 1";
+        }
+
+        if (forceMax || level >= maxLevel) return $"{label} Lv MAX";
+        return $"{label} Lv {level}/{maxLevel}";
     }
 
     private void BuildCanvas()

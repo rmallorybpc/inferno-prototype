@@ -23,6 +23,22 @@ public class LevelUpScreen : MonoBehaviour
     private GameObject panel;
     private int pending;
 
+    public bool TryGetLevel(UpgradeType type, out int level, out int maxLevel)
+    {
+        foreach (UpgradeData upgrade in pool)
+        {
+            if (upgrade.type != type || upgrade.maxPicks <= 0) continue;
+
+            level = PicksOf(upgrade) + 1;
+            maxLevel = upgrade.maxPicks + 1;
+            return true;
+        }
+
+        level = 1;
+        maxLevel = 0;
+        return false;
+    }
+
     private void Start()
     {
         foreach (UpgradeData upgrade in Resources.LoadAll<UpgradeData>("Upgrades"))
@@ -121,7 +137,7 @@ public class LevelUpScreen : MonoBehaviour
     private string CardText(UpgradeData upgrade)
     {
         string rank = upgrade.maxPicks > 0
-            ? $"  {PicksOf(upgrade) + 1}/{upgrade.maxPicks}"
+            ? $"  Lv {PicksOf(upgrade) + 2}/{upgrade.maxPicks + 1}"
             : "";
 
         return $"<b>{upgrade.title}</b>{rank}\n<size=70%>{upgrade.description}</size>";

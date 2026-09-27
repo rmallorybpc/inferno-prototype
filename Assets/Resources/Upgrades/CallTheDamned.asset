@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fc778698f566f44ca4e866140203ea8, type: 3}
   m_Name: CallTheDamned
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  title: Upgrade
+  title: Call The Damned
   description: 3 more followers
   type: 4
   amount: 3
+  maxPicks: 0
+  isFallback: 0

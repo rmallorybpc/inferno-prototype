@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fc778698f566f44ca4e866140203ea8, type: 3}
   m_Name: SecondWind
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  title: Upgrade
+  title: Second Wind
   description: Hero gains 2 health
   type: 3
   amount: 2

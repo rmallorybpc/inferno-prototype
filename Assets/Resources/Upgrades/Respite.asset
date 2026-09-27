@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fc778698f566f44ca4e866140203ea8, type: 3}
   m_Name: Respite
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  title: Upgrade
+  title: Respite
   description: Hero gains 1 health
   type: 3
   amount: 1
