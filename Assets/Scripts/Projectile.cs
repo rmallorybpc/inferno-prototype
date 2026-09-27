@@ -6,8 +6,6 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float lifetime = 2f;
     [SerializeField] private int damage = 1;
 
-    private bool spent;
-
     public void SetDamage(int amount)
     {
         damage = amount;
@@ -25,13 +23,12 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (spent) return;
+        if (damage <= 0) return;
 
         Enemy enemy = other.GetComponent<Enemy>();
         if (enemy == null) return;
 
-        spent = true;
-        enemy.TakeDamage(damage);
-        Destroy(gameObject);
+        damage -= enemy.TakeDamage(damage);
+        if (damage <= 0) Destroy(gameObject);
     }
 }

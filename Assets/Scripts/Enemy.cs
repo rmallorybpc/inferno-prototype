@@ -25,16 +25,19 @@ public class Enemy : MonoBehaviour
         speedMultiplier = multiplier;
     }
 
-    public void TakeDamage(int amount)
+    public int TakeDamage(int amount)
     {
-        if (spent) return;
+        if (spent || amount <= 0) return 0;
 
-        health -= amount;
-        if (health > 0) return;
+        int used = Mathf.Min(amount, health);
+        health -= used;
+
+        if (health > 0) return used;
 
         spent = true;
         if (experience != null) experience.Add(experienceValue);
         Destroy(gameObject);
+        return used;
     }
 
     private void Start()
