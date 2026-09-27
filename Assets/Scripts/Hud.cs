@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,6 +10,13 @@ public class Hud : MonoBehaviour
     [SerializeField] private string heroName = "Hero";
     [SerializeField] private float fontSize = 48f;
     [SerializeField] private float restartDelay = 1f;
+    [SerializeField] private int maxUpgradeLines = 2;
+
+    private struct UpgradeEntry
+    {
+        public string text;
+        public bool isMax;
+    }
 
     private Crowd crowd;
     private Experience experience;
@@ -51,13 +59,9 @@ public class Hud : MonoBehaviour
             ? $"\nLevel {experience.Level}  XP {experience.Current}/{experience.Required}"
             : "";
 
-        bool fireMaxed = shooter != null && shooter.IsFireRateMaxed;
-        string fireLine = "\n" + UpgradeLine("Fire", UpgradeType.FireRate, fireMaxed);
-        string volleyLine = "\n" + UpgradeLine("Volley", UpgradeType.ExtraShot, false);
-
         string crowdMax = crowd.IsFull ? "  MAX" : "";
         statusText.text = $"{heroName}  Health {crowd.HeroHealth}\nCrowd {crowd.Followers.Count}{crowdMax}";
-        progressText.text = $"Segment {segment}\n{time}{levelLine}{fireLine}{volleyLine}";
+        progressText.text = $"Segment {segment}\n{time}{levelLine}{BuildUpgradeLines()}";
 
         if (!crowd.IsDefeated) return;
 
@@ -77,15 +81,55 @@ public class Hud : MonoBehaviour
         }
     }
 
-    private string UpgradeLine(string label, UpgradeType type, bool forceMax)
+    private string BuildUpgradeLines()
+    {
+        List<UpgradeEntry> entries = new List<UpgradeEntry>();
+        bool fireMaxed = shooter != null && shooter.IsFireRateMaxed;
+
+        AddEntry(entries, "Fire", UpgradeType.FireRate, fireMaxed, true);
+        AddEntry(entries, "Volley", UpgradeType.ExtraShot, false, true);
+        AddEntry(entries, "Damage", UpgradeType.Damage, false, false);
+
+        bool[] selected = new bool[entries.Count];
+        int shown = 0;
+
+        for (int i = 0; i < entries.Count && shown < maxUpgradeLines; i++)
+        {
+            if (entries[i].isMax) continue;
+            selected[i] = true;
+            shown++;
+        }
+
+        for (int i = 0; i < entries.Count && shown < maxUpgradeLines; i++)
+        {
+            if (selected[i]) continue;
+            selected[i] = true;
+            shown++;
+        }
+
+        string lines = "";
+        for (int i = 0; i < entries.Count; i++)
+        {
+            if (selected[i]) lines += "\n" + entries[i].text;
+        }
+
+        return lines;
+    }
+
+    private void AddEntry(List<UpgradeEntry> entries, string label, UpgradeType type,
+        bool forceMax, bool alwaysShow)
     {
         if (levelUpScreen == null || !levelUpScreen.TryGetLevel(type, out int level, out int maxLevel))
         {
-            return $"{label} Lv 1";
+            if (alwaysShow) entries.Add(new UpgradeEntry { text = $"{label} Lv 1", isMax = false });
+            return;
         }
 
-        if (forceMax || level >= maxLevel) return $"{label} Lv MAX";
-        return $"{label} Lv {level}/{maxLevel}";
+        if (!alwaysShow && level < 2) return;
+
+        bool isMax = forceMax || level >= maxLevel;
+        string text = isMax ? $"{label} Lv MAX" : $"{label} Lv {level}/{maxLevel}";
+        entries.Add(new UpgradeEntry { text = text, isMax = isMax });
     }
 
     private void BuildCanvas()
