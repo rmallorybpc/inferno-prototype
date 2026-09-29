@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fc778698f566f44ca4e866140203ea8, type: 3}
   m_Name: HeavyBrands
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  title: Heavy Brands
-  description: +1 damage per shot
+  title: Hotter Flame
+  description: Your flames burn hotter. More damage per shot.
   type: 1
   amount: 1
   maxPicks: 5

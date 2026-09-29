@@ -117,7 +117,7 @@ public class Hud : MonoBehaviour
 
         AddEntry(entries, "Fire", UpgradeType.FireRate, fireMaxed, true);
         AddEntry(entries, "Volley", UpgradeType.ExtraShot, false, true);
-        AddEntry(entries, "Damage", UpgradeType.Damage, false, false);
+        AddEntry(entries, "Heat", UpgradeType.Damage, false, false);
 
         bool[] selected = new bool[entries.Count];
         int shown = 0;
