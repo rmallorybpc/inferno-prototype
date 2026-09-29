@@ -16,7 +16,6 @@ public class Crowd : MonoBehaviour
     private readonly List<Vector3> targets = new List<Vector3>();
     private Formation formation = Formation.Behind;
     private PlayerRunner runner;
-    private MeshRenderer heroRenderer;
 
     public int Count => followers.Count + 1;
     public int HeroHealth => heroHealth;
@@ -27,7 +26,6 @@ public class Crowd : MonoBehaviour
     private void Awake()
     {
         runner = GetComponent<PlayerRunner>();
-        heroRenderer = GetComponent<MeshRenderer>();
     }
 
     public int PreviewGate(GateOperation operation, int value)
@@ -138,7 +136,11 @@ public class Crowd : MonoBehaviour
         {
             Debug.Log("Run over");
             if (runner != null) runner.enabled = false;
-            if (heroRenderer != null) heroRenderer.enabled = false;
+
+            foreach (Renderer part in GetComponentsInChildren<Renderer>())
+            {
+                part.enabled = false;
+            }
         }
     }
 
