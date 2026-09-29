@@ -16,10 +16,16 @@ public class TrackSpawner : MonoBehaviour
     [Tooltip("Must match the Player's forward speed, so boss timing lines up with the clock.")]
     [SerializeField] private float runSpeed = 8f;
 
+    [Header("Guardian")]
+    [SerializeField] private GameObject guardianPrefab;
+    [SerializeField] private float guardianTime = 600f;
+    [SerializeField] private int guardianHealth = 60000;
+
     private readonly Queue<Segment> active = new Queue<Segment>();
     private Transform player;
     private int nextIndex;
     private int nextBoss;
+    private bool guardianPlaced;
 
     public int SegmentAt(float z)
     {
@@ -42,7 +48,7 @@ public class TrackSpawner : MonoBehaviour
         if (player == null) return;
 
         float frontZ = startZ + nextIndex * segmentLength;
-        if (frontZ - player.position.z < segmentsAhead * segmentLength)
+        if (!guardianPlaced && frontZ - player.position.z < segmentsAhead * segmentLength)
         {
             SpawnNext();
         }
@@ -56,6 +62,8 @@ public class TrackSpawner : MonoBehaviour
 
     private void SpawnNext()
     {
+        if (guardianPlaced) return;
+
         float segmentStart = startZ + nextIndex * segmentLength;
         Vector3 position = new Vector3(0f, 0f, segmentStart);
         Segment segment = Instantiate(segmentPrefab, position, Quaternion.identity);
@@ -63,11 +71,20 @@ public class TrackSpawner : MonoBehaviour
         float playerZ = player != null ? player.position.z : 0f;
         float arrivalTime = Time.timeSinceLevelLoad + (segmentStart - playerZ) / runSpeed;
 
-        bool isBoss = bossPrefab != null &&
+        bool isGuardian = guardianPrefab != null && arrivalTime >= guardianTime;
+
+        bool isBoss = !isGuardian &&
+                      bossPrefab != null &&
                       nextBoss < bossTimes.Length &&
                       arrivalTime >= bossTimes[nextBoss];
 
-        if (isBoss)
+        if (isGuardian)
+        {
+            segment.ConfigureBoss(nextIndex, guardianPrefab, guardianHealth);
+            Debug.Log($"Guardian placed at segment {nextIndex + 1} with {guardianHealth} health");
+            guardianPlaced = true;
+        }
+        else if (isBoss)
         {
             int health = Mathf.RoundToInt(bossBaseHealth * Mathf.Pow(bossHealthGrowth, nextBoss));
             segment.ConfigureBoss(nextIndex, bossPrefab, health);
