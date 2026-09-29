@@ -60,7 +60,7 @@ public class Hud : MonoBehaviour
             : "";
 
         string crowdMax = crowd.IsFull ? "  MAX" : "";
-        statusText.text = $"{heroName}  Health {crowd.HeroHealth}\nCrowd {crowd.Followers.Count}{crowdMax}";
+        statusText.text = $"{heroName}  Health {crowd.HeroHealth}\nCrowd {crowd.Count}{crowdMax}";
         progressText.text = $"Segment {segment}\n{time}{levelLine}{BuildUpgradeLines()}";
 
         if (!crowd.IsDefeated) return;
