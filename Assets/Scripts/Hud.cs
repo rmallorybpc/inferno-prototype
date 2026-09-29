@@ -27,7 +27,23 @@ public class Hud : MonoBehaviour
     private TextMeshProUGUI progressText;
     private TextMeshProUGUI centerText;
     private float runTime;
-    private float defeatedTime;
+    private float endedTime;
+    private bool won;
+
+    private void OnEnable()
+    {
+        Boss.GuardianDefeated += HandleGuardianDefeated;
+    }
+
+    private void OnDisable()
+    {
+        Boss.GuardianDefeated -= HandleGuardianDefeated;
+    }
+
+    private void HandleGuardianDefeated()
+    {
+        won = true;
+    }
 
     private void Start()
     {
@@ -48,7 +64,8 @@ public class Hud : MonoBehaviour
     {
         if (crowd == null) return;
 
-        if (!crowd.IsDefeated) runTime += Time.deltaTime;
+        bool ended = won || crowd.IsDefeated;
+        if (!ended) runTime += Time.deltaTime;
 
         int segment = spawner != null ? spawner.SegmentAt(crowd.transform.position.z) + 1 : 0;
         int minutes = (int)(runTime / 60f);
@@ -63,22 +80,34 @@ public class Hud : MonoBehaviour
         statusText.text = $"{heroName}  Health {crowd.HeroHealth}\nCrowd {crowd.Count}{crowdMax}";
         progressText.text = $"Segment {segment}\n{time}{levelLine}{BuildUpgradeLines()}";
 
-        if (!crowd.IsDefeated) return;
+        if (!ended) return;
 
         if (!centerText.gameObject.activeSelf)
         {
-            string levelReached = experience != null ? $", level {experience.Level}" : "";
             centerText.gameObject.SetActive(true);
-            centerText.text = $"Run over\nSegment {segment}, {time}{levelReached}\n\nTap to restart";
+            centerText.text = won ? WinText(time) : LossText(segment, time);
         }
 
-        defeatedTime += Time.deltaTime;
-        if (defeatedTime < restartDelay) return;
+        endedTime += Time.unscaledDeltaTime;
+        if (endedTime < restartDelay) return;
 
         if (Pointer.current != null && Pointer.current.press.wasPressedThisFrame)
         {
+            Time.timeScale = 1f;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
+    }
+
+    private string WinText(string time)
+    {
+        string level = experience != null ? $"  Level {experience.Level}" : "";
+        return $"CIRCLE CLEARED\n<size=70%>{time}{level}  Crowd {crowd.Count}</size>\n\nTap to restart";
+    }
+
+    private string LossText(int segment, string time)
+    {
+        string levelReached = experience != null ? $", level {experience.Level}" : "";
+        return $"Run over\nSegment {segment}, {time}{levelReached}\n\nTap to restart";
     }
 
     private string BuildUpgradeLines()
@@ -162,22 +191,5 @@ public class Hud : MonoBehaviour
         Vector2 offset, Vector2 size, TextAlignmentOptions alignment)
     {
         GameObject textObject = new GameObject(name);
-        textObject.transform.SetParent(parent, false);
 
-        TextMeshProUGUI text = textObject.AddComponent<TextMeshProUGUI>();
-        text.fontSize = fontSize;
-        text.alignment = alignment;
-        text.color = Color.white;
-        text.outlineWidth = 0.25f;
-        text.outlineColor = Color.black;
-
-        RectTransform rect = text.rectTransform;
-        rect.anchorMin = anchor;
-        rect.anchorMax = anchor;
-        rect.pivot = anchor;
-        rect.anchoredPosition = offset;
-        rect.sizeDelta = size;
-
-        return text;
-    }
-}
+    

@@ -1,9 +1,13 @@
+using System;
 using TMPro;
 using UnityEngine;
 
 public class Boss : MonoBehaviour
 {
+    public static event Action GuardianDefeated;
+
     [SerializeField] private string displayName = "BOSS";
+    [SerializeField] private bool isGuardian;
     [SerializeField] private float approachSpeed = 4f;
     [SerializeField] private float trackingSpeed = 16f;
     [SerializeField] private float holdDistance = 25f;
@@ -159,12 +163,21 @@ public class Boss : MonoBehaviour
     {
         defeated = true;
 
-        float roll = Random.value;
+        if (crowd != null) crowd.SetFormation(Crowd.Formation.Behind);
+
+        if (isGuardian)
+        {
+            Debug.Log("Guardian defeated, circle cleared");
+            GuardianDefeated?.Invoke();
+            Destroy(gameObject);
+            return;
+        }
+
+        float roll = UnityEngine.Random.value;
         int picks = roll < fiveChestChance ? 5 : roll < fiveChestChance + threeChestChance ? 3 : 1;
 
         if (levelUpScreen != null) levelUpScreen.GrantTreasure(picks);
         if (experience != null) experience.Add(experienceValue);
-        if (crowd != null) crowd.SetFormation(Crowd.Formation.Behind);
 
         Debug.Log($"Boss defeated, treasure x{picks}");
         Destroy(gameObject);
