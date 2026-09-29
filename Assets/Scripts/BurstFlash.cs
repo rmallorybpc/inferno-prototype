@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class BurstFlash : MonoBehaviour
 {
-    [SerializeField] private float duration = 0.25f;
+    [SerializeField] private float duration = 0.35f;
+    [SerializeField] private float startScale = 0.4f;
     [SerializeField] private int maxPerSecond = 20;
 
     private static readonly int ColorId = Shader.PropertyToID("_BaseColor");
@@ -49,10 +50,10 @@ public class BurstFlash : MonoBehaviour
         elapsed += Time.deltaTime;
         float progress = Mathf.Clamp01(elapsed / duration);
 
-        transform.localScale = Vector3.one * targetScale * Mathf.Lerp(0.3f, 1f, progress);
+        transform.localScale = Vector3.one * targetScale * Mathf.Lerp(startScale, 1f, progress);
 
         Color faded = baseColor;
-        faded.a = baseColor.a * (1f - progress);
+        faded.a = baseColor.a * (1f - progress * progress);
         block.SetColor(ColorId, faded);
         flashRenderer.SetPropertyBlock(block);
 

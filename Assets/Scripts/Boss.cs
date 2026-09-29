@@ -13,15 +13,11 @@ public class Boss : MonoBehaviour
     [SerializeField] private float holdDistance = 25f;
     [SerializeField] private float grindInterval = 0.5f;
     [SerializeField] private int hitsPerGrind = 3;
-    [SerializeField] private int experienceValue = 20;
-    [SerializeField] private float fiveChestChance = 0.1f;
-    [SerializeField] private float threeChestChance = 0.3f;
     [SerializeField] private float labelHeight = 1.5f;
     [SerializeField] private float labelSize = 14f;
 
     private Crowd crowd;
     private PlayerRunner runner;
-    private Experience experience;
     private LevelUpScreen levelUpScreen;
     private BoxCollider box;
     private TextMeshPro label;
@@ -73,11 +69,7 @@ public class Boss : MonoBehaviour
         crowd = FindFirstObjectByType<Crowd>();
         levelUpScreen = FindFirstObjectByType<LevelUpScreen>();
 
-        if (crowd != null)
-        {
-            runner = crowd.GetComponent<PlayerRunner>();
-            experience = crowd.GetComponent<Experience>();
-        }
+        if (crowd != null) runner = crowd.GetComponent<PlayerRunner>();
 
         Vector3 position = transform.position;
         position.y = 0f;
@@ -173,13 +165,9 @@ public class Boss : MonoBehaviour
             return;
         }
 
-        float roll = UnityEngine.Random.value;
-        int picks = roll < fiveChestChance ? 5 : roll < fiveChestChance + threeChestChance ? 3 : 1;
+        if (levelUpScreen != null) levelUpScreen.GrantBossReward();
 
-        if (levelUpScreen != null) levelUpScreen.GrantTreasure(picks);
-        if (experience != null) experience.Add(experienceValue);
-
-        Debug.Log($"Boss defeated, treasure x{picks}");
+        Debug.Log("Boss defeated, reward granted");
         Destroy(gameObject);
     }
 }

@@ -103,5 +103,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c55978c8f6ff8a418064e69d09fdccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BurstFlash
-  duration: 0.25
+  duration: 0.35
+  startScale: 0.4
   maxPerSecond: 20

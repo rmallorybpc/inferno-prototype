@@ -9,6 +9,8 @@ public class LevelUpScreen : MonoBehaviour
 {
     [SerializeField] private int choices = 3;
     [SerializeField] private float fontSize = 44f;
+    [SerializeField] private Color cardColor = new Color(0.25f, 0.12f, 0.08f, 0.95f);
+    [SerializeField] private Color bossCardColor = new Color(0.5f, 0.35f, 0.05f, 0.95f);
 
     private readonly List<UpgradeData> pool = new List<UpgradeData>();
     private readonly List<UpgradeData> fallbacks = new List<UpgradeData>();
@@ -16,6 +18,7 @@ public class LevelUpScreen : MonoBehaviour
     private readonly Dictionary<UpgradeData, int> picks = new Dictionary<UpgradeData, int>();
     private readonly List<Button> cardButtons = new List<Button>();
     private readonly List<TextMeshProUGUI> cardTexts = new List<TextMeshProUGUI>();
+    private readonly List<Vector2> cardPositions = new List<Vector2>();
 
     private Experience experience;
     private Crowd crowd;
@@ -23,7 +26,7 @@ public class LevelUpScreen : MonoBehaviour
     private GameObject panel;
     private TextMeshProUGUI headingText;
     private int levelPending;
-    private int treasurePending;
+    private int bossRewardPending;
     private int bossesDefeated;
 
     public bool TryGetLevel(UpgradeType type, out int level, out int maxLevel)
@@ -42,10 +45,10 @@ public class LevelUpScreen : MonoBehaviour
         return false;
     }
 
-    public void GrantTreasure(int picksGranted)
+    public void GrantBossReward()
     {
         bossesDefeated++;
-        treasurePending += picksGranted;
+        bossRewardPending++;
         if (!panel.activeSelf) ShowCards();
     }
 
@@ -105,24 +108,27 @@ public class LevelUpScreen : MonoBehaviour
         }
     }
 
-    private bool HasNewUnlocks()
-    {
-        if (bossesDefeated == 0) return false;
-
-        foreach (UpgradeData upgrade in pool)
-        {
-            if (upgrade.unlockAfterBoss == bossesDefeated) return true;
-        }
-
-        return false;
-    }
-
     private void ShowCards()
     {
+        bool bossReward = bossRewardPending > 0;
         List<UpgradeData> candidates = new List<UpgradeData>();
-        foreach (UpgradeData upgrade in pool)
+
+        if (bossReward)
         {
-            if (IsAvailable(upgrade)) candidates.Add(upgrade);
+            foreach (UpgradeData upgrade in pool)
+            {
+                if (upgrade.unlockAfterBoss == bossesDefeated && IsAvailable(upgrade)) candidates.Add(upgrade);
+            }
+        }
+
+        bool newUnlock = candidates.Count > 0;
+
+        if (candidates.Count == 0)
+        {
+            foreach (UpgradeData upgrade in pool)
+            {
+                if (IsAvailable(upgrade)) candidates.Add(upgrade);
+            }
         }
 
         if (candidates.Count == 0) candidates.AddRange(fallbacks);
@@ -130,16 +136,16 @@ public class LevelUpScreen : MonoBehaviour
         if (candidates.Count == 0)
         {
             levelPending = 0;
-            treasurePending = 0;
+            bossRewardPending = 0;
             panel.SetActive(false);
             Time.timeScale = 1f;
             return;
         }
 
-        if (treasurePending > 0)
+        if (bossReward)
         {
-            string unlocked = HasNewUnlocks() ? "\n<size=55%>New upgrades unlocked</size>" : "";
-            headingText.text = $"Treasure  x{treasurePending}{unlocked}";
+            string unlocked = newUnlock ? "\n<size=55%>New upgrade</size>" : "";
+            headingText.text = $"Boss defeated{unlocked}";
         }
         else
         {
@@ -147,7 +153,7 @@ public class LevelUpScreen : MonoBehaviour
         }
 
         offered.Clear();
-        int count = Mathf.Min(choices, candidates.Count);
+        int count = bossReward ? 1 : Mathf.Min(choices, candidates.Count);
 
         for (int i = 0; i < count; i++)
         {
@@ -160,8 +166,16 @@ public class LevelUpScreen : MonoBehaviour
         {
             bool visible = i < offered.Count;
             cardButtons[i].gameObject.SetActive(visible);
+            if (!visible) continue;
 
-            if (visible) cardTexts[i].text = CardText(offered[i]);
+            cardTexts[i].text = CardText(offered[i]);
+
+            RectTransform rect = (RectTransform)cardButtons[i].transform;
+            bool centered = offered.Count == 1 && cardPositions.Count > 1;
+            rect.anchoredPosition = centered ? cardPositions[1] : cardPositions[i];
+
+            Image background = (Image)cardButtons[i].targetGraphic;
+            background.color = bossReward ? bossCardColor : cardColor;
         }
 
         panel.SetActive(true);
@@ -185,10 +199,10 @@ public class LevelUpScreen : MonoBehaviour
         picks[chosen] = PicksOf(chosen) + 1;
         Apply(chosen);
 
-        if (treasurePending > 0) treasurePending--;
+        if (bossRewardPending > 0) bossRewardPending--;
         else levelPending--;
 
-        if (treasurePending + levelPending > 0)
+        if (bossRewardPending + levelPending > 0)
         {
             ShowCards();
             return;
@@ -266,13 +280,14 @@ public class LevelUpScreen : MonoBehaviour
         for (int i = 0; i < choices; i++)
         {
             int index = i;
-            float y = 250f - i * 330f;
+            Vector2 position = new Vector2(0f, 250f - i * 330f);
 
-            Button button = CreateCard(panel.transform, new Vector2(0f, y), out TextMeshProUGUI text);
+            Button button = CreateCard(panel.transform, position, out TextMeshProUGUI text);
             button.onClick.AddListener(() => Choose(index));
 
             cardButtons.Add(button);
             cardTexts.Add(text);
+            cardPositions.Add(position);
         }
 
         panel.SetActive(false);
@@ -284,7 +299,7 @@ public class LevelUpScreen : MonoBehaviour
         cardObject.transform.SetParent(parent, false);
 
         Image background = cardObject.AddComponent<Image>();
-        background.color = new Color(0.25f, 0.12f, 0.08f, 0.95f);
+        background.color = cardColor;
 
         RectTransform rect = background.rectTransform;
         rect.sizeDelta = new Vector2(860f, 280f);
