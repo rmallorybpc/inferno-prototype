@@ -14,13 +14,12 @@ public class Crowd : MonoBehaviour
     [SerializeField, Range(0.2f, 1f)] private float behindDepth = 0.45f;
 
     private readonly List<Transform> followers = new List<Transform>();
-    private readonly List<Vector3> targets = new List<Vector3>();
     private Formation formation = Formation.Behind;
     private PlayerRunner runner;
 
     public int Count => followers.Count + 1;
     public int HeroHealth => heroHealth;
-    public bool IsDefeated => heroHealth <= 0;
+    public bool IsDefeated { get; private set; }
     public bool IsFull => followers.Count >= maxFollowers;
     public IReadOnlyList<Transform> Followers => followers;
 
@@ -29,35 +28,32 @@ public class Crowd : MonoBehaviour
         runner = GetComponent<PlayerRunner>();
     }
 
+    private void Update()
+    {
+        if (IsDefeated) return;
+        Arrange();
+    }
+
     public int PreviewGate(GateOperation operation, int value)
     {
         int total = Count;
-        int newTotal;
+        int result;
 
         switch (operation)
         {
-            case GateOperation.Subtract:
-                newTotal = total - value;
-                break;
-            case GateOperation.Multiply:
-                newTotal = total * value;
-                break;
-            case GateOperation.Divide:
-                newTotal = Mathf.CeilToInt(total / (float)value);
-                break;
-            default:
-                newTotal = total + value;
-                break;
+            case GateOperation.Add: result = total + value; break;
+            case GateOperation.Subtract: result = total - value; break;
+            case GateOperation.Multiply: result = total * value; break;
+            case GateOperation.Divide: result = value > 0 ? total / value : total; break;
+            default: result = total; break;
         }
 
-        int newFollowers = Mathf.Clamp(newTotal - 1, 0, maxFollowers);
-        return newFollowers + 1;
+        return Mathf.Clamp(result, 1, maxFollowers + 1);
     }
 
     public void ApplyGate(GateOperation operation, int value)
     {
-        int newFollowers = PreviewGate(operation, value) - 1;
-        int change = newFollowers - followers.Count;
+        int change = PreviewGate(operation, value) - Count;
 
         if (change > 0) Add(change);
         else if (change < 0) Remove(-change);
@@ -65,116 +61,97 @@ public class Crowd : MonoBehaviour
 
     public void Add(int amount)
     {
-        amount = Mathf.Min(amount, maxFollowers - followers.Count);
-        if (amount <= 0) return;
+        if (IsDefeated || followerPrefab == null) return;
 
-        for (int i = 0; i < amount; i++)
+        for (int i = 0; i < amount && !IsFull; i++)
         {
             GameObject follower = Instantiate(followerPrefab, transform);
+            follower.transform.localPosition = new Vector3(0f, followerHeight, 0f);
             followers.Add(follower.transform);
-            targets.Add(Vector3.zero);
-        }
-
-        Arrange();
-
-        for (int i = followers.Count - amount; i < followers.Count; i++)
-        {
-            followers[i].localPosition = targets[i];
         }
     }
 
     public void Remove(int amount)
     {
-        amount = Mathf.Min(amount, followers.Count);
-
-        for (int i = 0; i < amount; i++)
+        for (int i = 0; i < amount && followers.Count > 0; i++)
         {
             int last = followers.Count - 1;
-            Destroy(followers[last].gameObject);
+            Transform follower = followers[last];
             followers.RemoveAt(last);
-            targets.RemoveAt(last);
+            if (follower != null) Destroy(follower.gameObject);
         }
-
-        Arrange();
     }
 
     public void Heal(int amount)
     {
         if (IsDefeated) return;
-
         heroHealth += amount;
-        Debug.Log($"Hero healed, health {heroHealth}");
     }
 
     public void SetFormation(Formation newFormation)
     {
-        if (formation == newFormation) return;
-
         formation = newFormation;
-        Arrange();
     }
 
     public void TakeHit(Transform struck)
     {
         if (IsDefeated) return;
 
-        if (followers.Count > 0)
+        if (struck != null)
         {
             int index = followers.IndexOf(struck);
-            if (index < 0) index = followers.Count - 1;
+            if (index >= 0)
+            {
+                followers.RemoveAt(index);
+                Destroy(struck.gameObject);
+                return;
+            }
+        }
 
-            Destroy(followers[index].gameObject);
-            followers.RemoveAt(index);
-            targets.RemoveAt(index);
-            Arrange();
+        if (followers.Count > 0)
+        {
+            Remove(1);
             return;
         }
 
         heroHealth--;
-        Debug.Log($"Hero hit, health {heroHealth}");
-
-        if (IsDefeated)
-        {
-            Debug.Log("Run over");
-            if (runner != null) runner.enabled = false;
-
-            foreach (Renderer part in GetComponentsInChildren<Renderer>())
-            {
-                part.enabled = false;
-            }
-        }
+        if (heroHealth <= 0) Defeat();
     }
 
-    private void Update()
+    private void Defeat()
     {
-        float step = regroupSpeed * Time.deltaTime;
+        IsDefeated = true;
+        heroHealth = 0;
 
-        for (int i = 0; i < followers.Count; i++)
+        if (runner != null) runner.enabled = false;
+
+        foreach (Renderer part in GetComponentsInChildren<Renderer>())
         {
-            followers[i].localPosition = Vector3.MoveTowards(
-                followers[i].localPosition,
-                targets[i],
-                step);
+            part.enabled = false;
         }
     }
 
     private void Arrange()
     {
-        const float goldenAngle = 137.5f * Mathf.Deg2Rad;
-        bool ahead = formation == Formation.Ahead;
-        float side = ahead ? 1f : -1f;
-        float depth = ahead ? 1f : behindDepth;
+        float golden = Mathf.PI * (3f - Mathf.Sqrt(5f));
+        float side = formation == Formation.Ahead ? 1f : -1f;
+        float depth = formation == Formation.Ahead ? 1f : behindDepth;
+        float step = regroupSpeed * Time.deltaTime;
 
-        for (int i = 0; i < followers.Count; i++)
+        for (int n = 0; n < followers.Count; n++)
         {
-            int n = i + 1;
-            float angle = (n * goldenAngle) % (2f * Mathf.PI) * 0.5f;
+            Transform follower = followers[n];
+            if (follower == null) continue;
+
+            float angle = (n * golden) % (2f * Mathf.PI) * 0.5f;
             float radius = spacing * Mathf.Sqrt(n + 1) * 1.41f;
 
-            targets[i] = new Vector3(
+            Vector3 target = new Vector3(
                 Mathf.Cos(angle) * radius,
                 followerHeight,
                 Mathf.Sin(angle) * radius * side * depth);
+
+            follower.localPosition = Vector3.MoveTowards(follower.localPosition, target, step);
         }
     }
 }

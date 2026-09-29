@@ -191,5 +191,22 @@ public class Hud : MonoBehaviour
         Vector2 offset, Vector2 size, TextAlignmentOptions alignment)
     {
         GameObject textObject = new GameObject(name);
+        textObject.transform.SetParent(parent, false);
 
-    
+        TextMeshProUGUI text = textObject.AddComponent<TextMeshProUGUI>();
+        text.fontSize = fontSize;
+        text.alignment = alignment;
+        text.color = Color.white;
+        text.outlineWidth = 0.25f;
+        text.outlineColor = Color.black;
+
+        RectTransform rect = text.rectTransform;
+        rect.anchorMin = anchor;
+        rect.anchorMax = anchor;
+        rect.pivot = anchor;
+        rect.anchoredPosition = offset;
+        rect.sizeDelta = size;
+
+        return text;
+    }
+}
