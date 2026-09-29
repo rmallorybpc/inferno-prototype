@@ -5,6 +5,7 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float speed = 25f;
     [SerializeField] private float lifetime = 2f;
     [SerializeField] private int damage = 1;
+    [SerializeField] private GameObject burstFlashPrefab;
 
     private static readonly Collider[] burstHits = new Collider[32];
 
@@ -56,6 +57,8 @@ public class Projectile : MonoBehaviour
     private void Burst(Collider struck)
     {
         if (burstRadius <= 0f || burstDamage <= 0) return;
+
+        BurstFlash.Spawn(burstFlashPrefab, transform.position, burstRadius);
 
         int count = Physics.OverlapSphereNonAlloc(
             transform.position, burstRadius, burstHits, ~0, QueryTriggerInteraction.Collide);
