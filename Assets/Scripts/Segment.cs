@@ -13,6 +13,7 @@ public class Segment : MonoBehaviour
     [Header("Gates")]
     [SerializeField] private int baseAddValue = 3;
     [SerializeField] private int addValuePerSegment = 1;
+    [Tooltip("From this segment on, multiply and divide gates each roll 2 or 3.")]
     [SerializeField] private int tripleMultiplyFrom = 12;
 
     [Header("Enemies")]
@@ -91,12 +92,12 @@ public class Segment : MonoBehaviour
 
         string heading = undecided ? "<b>UNDECIDED</b>\n" : "";
         string crowdMax = crowd.IsFull ? " MAX" : "";
-        string text = $"{heading}{chosen.Label}\n<size=60%>Crowd {crowd.Followers.Count}{crowdMax}</size>";
+        string text = $"{heading}{chosen.Label}\n<size=60%>Crowd {crowd.Count}{crowdMax}</size>";
 
         StartCoroutine(Popup(text, chosen.DisplayColor, chosen.transform.position.x));
 
         string side = undecided ? "undecided" : (chosen == gateLeft ? "left" : "right");
-        Debug.Log($"Gate {chosen.Label} ({side}), crowd now {crowd.Followers.Count}");
+        Debug.Log($"Gate {chosen.Label} ({side}), crowd now {crowd.Count}");
     }
 
     private IEnumerator Popup(string text, Color color, float x)
@@ -140,7 +141,10 @@ public class Segment : MonoBehaviour
         int addValue = baseAddValue + addValuePerSegment * index;
         int smallAdd = Mathf.Max(1, addValue / 3);
         int subtractValue = 2 + index / 2;
-        int multiplyValue = index >= tripleMultiplyFrom ? 3 : 2;
+
+        bool tripleUnlocked = index >= tripleMultiplyFrom;
+        int multiplyValue = tripleUnlocked ? Random.Range(2, 4) : 2;
+        int divideValue = tripleUnlocked ? Random.Range(2, 4) : 2;
 
         List<int> patterns = new List<int> { 0 };
         if (index >= 2) patterns.Add(1);
@@ -174,7 +178,7 @@ public class Segment : MonoBehaviour
                 break;
             case 4:
                 operationA = GateOperation.Subtract; valueA = subtractValue;
-                operationB = GateOperation.Divide; valueB = 2;
+                operationB = GateOperation.Divide; valueB = divideValue;
                 break;
             default:
                 operationA = GateOperation.Add; valueA = addValue;
