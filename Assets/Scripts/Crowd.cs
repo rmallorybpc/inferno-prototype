@@ -11,6 +11,7 @@ public class Crowd : MonoBehaviour
     [SerializeField] private float regroupSpeed = 6f;
     [SerializeField] private int heroHealth = 5;
     [SerializeField] private int maxFollowers = 150;
+    [SerializeField, Range(0.2f, 1f)] private float behindDepth = 0.45f;
 
     private readonly List<Transform> followers = new List<Transform>();
     private readonly List<Vector3> targets = new List<Vector3>();
@@ -160,7 +161,9 @@ public class Crowd : MonoBehaviour
     private void Arrange()
     {
         const float goldenAngle = 137.5f * Mathf.Deg2Rad;
-        float side = formation == Formation.Ahead ? 1f : -1f;
+        bool ahead = formation == Formation.Ahead;
+        float side = ahead ? 1f : -1f;
+        float depth = ahead ? 1f : behindDepth;
 
         for (int i = 0; i < followers.Count; i++)
         {
@@ -171,7 +174,7 @@ public class Crowd : MonoBehaviour
             targets[i] = new Vector3(
                 Mathf.Cos(angle) * radius,
                 followerHeight,
-                Mathf.Sin(angle) * radius * side);
+                Mathf.Sin(angle) * radius * side * depth);
         }
     }
 }
