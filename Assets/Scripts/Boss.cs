@@ -19,6 +19,7 @@ public class Boss : MonoBehaviour
     private PlayerRunner runner;
     private Experience experience;
     private LevelUpScreen levelUpScreen;
+    private BoxCollider box;
     private TextMeshPro label;
     private int maxHealth = 1;
     private int health = 1;
@@ -50,6 +51,8 @@ public class Boss : MonoBehaviour
 
     private void Awake()
     {
+        box = GetComponent<BoxCollider>();
+
         GameObject labelObject = new GameObject("BossLabel");
         label = labelObject.AddComponent<TextMeshPro>();
         label.alignment = TextAlignmentOptions.Center;
@@ -73,7 +76,7 @@ public class Boss : MonoBehaviour
         }
 
         Vector3 position = transform.position;
-        position.y = transform.localScale.y * 0.5f;
+        position.y = 0f;
         transform.position = position;
     }
 
@@ -129,8 +132,8 @@ public class Boss : MonoBehaviour
     {
         if (label == null) return;
 
-        float top = transform.localScale.y * 0.5f + labelHeight;
-        label.transform.position = transform.position + Vector3.up * top;
+        float top = box != null ? box.center.y + box.size.y * 0.5f : 4f;
+        label.transform.position = transform.position + Vector3.up * (top + labelHeight);
     }
 
     private void OnTriggerStay(Collider other)
