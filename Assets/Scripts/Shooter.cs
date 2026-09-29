@@ -12,6 +12,10 @@ public class Shooter : MonoBehaviour
     [SerializeField] private float muzzleForward = 0.6f;
     [SerializeField] private int maxShotsPerSecond = 150;
 
+    [Header("Hero")]
+    [SerializeField] private float heroDamageMultiplier = 3f;
+    [SerializeField] private float heroProjectileScale = 1.8f;
+
     private Crowd crowd;
     private float timer;
     private int volleyCount;
@@ -58,45 +62,45 @@ public class Shooter : MonoBehaviour
 
     private void FireVolley()
     {
+        int heroDamage = Mathf.Max(1, Mathf.RoundToInt(damage * heroDamageMultiplier));
+        Fire(transform, heroDamage, heroProjectileScale);
+
         int followerCount = crowd != null ? crowd.Followers.Count : 0;
-        int shooterCount = 1 + followerCount;
-
         int volleyBudget = Mathf.Max(1, Mathf.RoundToInt(maxShotsPerSecond * fireInterval));
-        int maxShooters = Mathf.Max(1, volleyBudget / shotsPerShooter);
+        int followerBudget = Mathf.Max(0, volleyBudget - shotsPerShooter);
+        int maxShooters = followerBudget / shotsPerShooter;
 
-        if (shooterCount <= maxShooters)
+        LastVolleyShots = shotsPerShooter;
+        LastShotDamage = damage;
+
+        if (followerCount == 0 || maxShooters == 0) return;
+
+        if (followerCount <= maxShooters)
         {
-            for (int i = 0; i < shooterCount; i++)
+            foreach (Transform follower in crowd.Followers)
             {
-                Fire(ShooterAt(i), damage);
+                Fire(follower, damage, 1f);
             }
 
-            LastVolleyShots = shooterCount * shotsPerShooter;
-            LastShotDamage = damage;
+            LastVolleyShots += followerCount * shotsPerShooter;
             return;
         }
 
-        float step = shooterCount / (float)maxShooters;
+        float step = followerCount / (float)maxShooters;
         int scaledDamage = Mathf.Max(1, Mathf.RoundToInt(damage * step));
         float phase = (volleyCount * 0.37f) % 1f;
 
         for (int k = 0; k < maxShooters; k++)
         {
-            int index = Mathf.FloorToInt((k + phase) * step) % shooterCount;
-            Fire(ShooterAt(index), scaledDamage);
+            int index = Mathf.FloorToInt((k + phase) * step) % followerCount;
+            Fire(crowd.Followers[index], scaledDamage, 1f);
         }
 
-        LastVolleyShots = maxShooters * shotsPerShooter;
+        LastVolleyShots += maxShooters * shotsPerShooter;
         LastShotDamage = scaledDamage;
     }
 
-    private Transform ShooterAt(int index)
-    {
-        if (index == 0 || crowd == null) return transform;
-        return crowd.Followers[index - 1];
-    }
-
-    private void Fire(Transform shooter, int shotDamage)
+    private void Fire(Transform shooter, int shotDamage, float scale)
     {
         Vector3 origin = new Vector3(
             shooter.position.x,
@@ -109,6 +113,8 @@ public class Shooter : MonoBehaviour
             Quaternion rotation = Quaternion.Euler(0f, angle, 0f);
 
             GameObject shot = Instantiate(projectilePrefab, origin, rotation);
+            if (scale != 1f) shot.transform.localScale *= scale;
+
             Projectile projectile = shot.GetComponent<Projectile>();
             if (projectile != null) projectile.SetDamage(shotDamage);
         }
