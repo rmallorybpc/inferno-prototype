@@ -960,7 +960,8 @@ MonoBehaviour:
   followerHeight: -0.5
   regroupSpeed: 6
   heroHealth: 5
-  maxFollowers: 150
+  maxFollowers: 149
+  behindDepth: 0.45
 --- !u!114 &2035930171
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -982,6 +983,8 @@ MonoBehaviour:
   fireHeight: 0.5
   muzzleForward: 0.6
   maxShotsPerSecond: 150
+  heroDamageMultiplier: 3
+  heroProjectileScale: 1.8
 --- !u!114 &2035930172
 MonoBehaviour:
   m_ObjectHideFlags: 0
