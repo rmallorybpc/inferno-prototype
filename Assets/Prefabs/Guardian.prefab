@@ -65,6 +65,10 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3626432375496170268, guid: 18e9c63aa375f3a4192085edb3768879, type: 3}
+      propertyPath: isGuardian
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3626432375496170268, guid: 18e9c63aa375f3a4192085edb3768879, type: 3}
       propertyPath: displayName
       value: GUARDIAN
       objectReference: {fileID: 0}

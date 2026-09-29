@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum UpgradeType { FireRate, Damage, ExtraShot, HeroHealth, Recruit }
+public enum UpgradeType { FireRate, Damage, ExtraShot, HeroHealth, Recruit, Burst }
 
 [CreateAssetMenu(fileName = "Upgrade", menuName = "Inferno/Upgrade")]
 public class UpgradeData : ScriptableObject

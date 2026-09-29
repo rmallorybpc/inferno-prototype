@@ -219,6 +219,9 @@ public class LevelUpScreen : MonoBehaviour
             case UpgradeType.Recruit:
                 if (crowd != null) crowd.Add(whole);
                 break;
+            case UpgradeType.Burst:
+                if (shooter != null) shooter.AddBurst(whole);
+                break;
         }
 
         Debug.Log($"Upgrade chosen: {upgrade.title}");

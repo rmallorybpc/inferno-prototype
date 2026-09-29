@@ -16,14 +16,23 @@ public class Shooter : MonoBehaviour
     [SerializeField] private float heroDamageMultiplier = 3f;
     [SerializeField] private float heroProjectileScale = 1.8f;
 
+    [Header("Burst")]
+    [SerializeField] private float burstBaseRadius = 1.5f;
+    [SerializeField] private float burstRadiusPerLevel = 0.5f;
+    [SerializeField] private int burstDamagePerLevel = 1;
+
     private Crowd crowd;
     private float timer;
     private int volleyCount;
+    private int burstLevel;
 
     public float VolleysPerSecond => 1f / fireInterval;
     public bool IsFireRateMaxed => fireInterval <= minFireInterval + 0.0001f;
     public int LastVolleyShots { get; private set; }
     public int LastShotDamage { get; private set; }
+
+    private float BurstRadius => burstLevel > 0 ? burstBaseRadius + burstRadiusPerLevel * (burstLevel - 1) : 0f;
+    private int BurstDamage => burstDamagePerLevel * burstLevel;
 
     public void ImproveFireRate(float fraction)
     {
@@ -39,6 +48,12 @@ public class Shooter : MonoBehaviour
     public void AddShots(int amount)
     {
         shotsPerShooter += amount;
+    }
+
+    public void AddBurst(int levels)
+    {
+        burstLevel += levels;
+        Debug.Log($"Burst level {burstLevel}: radius {BurstRadius:0.0}, damage {BurstDamage}");
     }
 
     private void Awake()
@@ -63,7 +78,8 @@ public class Shooter : MonoBehaviour
     private void FireVolley()
     {
         int heroDamage = Mathf.Max(1, Mathf.RoundToInt(damage * heroDamageMultiplier));
-        Fire(transform, heroDamage, heroProjectileScale);
+        int heroBurst = Mathf.RoundToInt(BurstDamage * heroDamageMultiplier);
+        Fire(transform, heroDamage, heroBurst, heroProjectileScale);
 
         int followerCount = crowd != null ? crowd.Followers.Count : 0;
         int volleyBudget = Mathf.Max(1, Mathf.RoundToInt(maxShotsPerSecond * fireInterval));
@@ -79,7 +95,7 @@ public class Shooter : MonoBehaviour
         {
             foreach (Transform follower in crowd.Followers)
             {
-                Fire(follower, damage, 1f);
+                Fire(follower, damage, BurstDamage, 1f);
             }
 
             LastVolleyShots += followerCount * shotsPerShooter;
@@ -88,19 +104,20 @@ public class Shooter : MonoBehaviour
 
         float step = followerCount / (float)maxShooters;
         int scaledDamage = Mathf.Max(1, Mathf.RoundToInt(damage * step));
+        int scaledBurst = Mathf.RoundToInt(BurstDamage * step);
         float phase = (volleyCount * 0.37f) % 1f;
 
         for (int k = 0; k < maxShooters; k++)
         {
             int index = Mathf.FloorToInt((k + phase) * step) % followerCount;
-            Fire(crowd.Followers[index], scaledDamage, 1f);
+            Fire(crowd.Followers[index], scaledDamage, scaledBurst, 1f);
         }
 
         LastVolleyShots += maxShooters * shotsPerShooter;
         LastShotDamage = scaledDamage;
     }
 
-    private void Fire(Transform shooter, int shotDamage, float scale)
+    private void Fire(Transform shooter, int shotDamage, int burstDamage, float scale)
     {
         Vector3 origin = new Vector3(
             shooter.position.x,
@@ -116,7 +133,10 @@ public class Shooter : MonoBehaviour
             if (scale != 1f) shot.transform.localScale *= scale;
 
             Projectile projectile = shot.GetComponent<Projectile>();
-            if (projectile != null) projectile.SetDamage(shotDamage);
+            if (projectile == null) continue;
+
+            projectile.SetDamage(shotDamage);
+            projectile.SetBurst(BurstRadius, burstDamage);
         }
     }
 }
