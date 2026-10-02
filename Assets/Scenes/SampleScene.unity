@@ -769,6 +769,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelUpScreen
   choices: 3
   fontSize: 44
+  cardColor: {r: 0.25, g: 0.12, b: 0.08, a: 0.95}
+  bossCardColor: {r: 0.5, g: 0.35, b: 0.05, a: 0.95}
 --- !u!4 &1468018793
 Transform:
   m_ObjectHideFlags: 0
@@ -988,6 +990,14 @@ MonoBehaviour:
   maxShotsPerSecond: 150
   heroDamageMultiplier: 3
   heroProjectileScale: 1.8
+  burstBaseRadius: 1.5
+  burstRadiusPerLevel: 0.5
+  burstDamagePerLevel: 1
+  hellfireBaseRadius: 1.5
+  hellfireRadiusPerLevel: 0.25
+  hellfireDamagePerLevel: 1
+  hellfireBaseDuration: 2
+  hellfireDurationPerLevel: 0.5
 --- !u!114 &2035930172
 MonoBehaviour:
   m_ObjectHideFlags: 0

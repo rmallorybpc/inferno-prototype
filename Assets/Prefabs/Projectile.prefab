@@ -157,3 +157,4 @@ MonoBehaviour:
   lifetime: 0.25
   damage: 1
   burstFlashPrefab: {fileID: 1499417536025601465, guid: 3c56d03ce16b29f439a231e8f7cecf4c, type: 3}
+  hellfirePatchPrefab: {fileID: 293907365283399202, guid: 4f82056e6fc9d624faa49e9480fcaf54, type: 3}

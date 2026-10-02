@@ -6,11 +6,15 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float lifetime = 2f;
     [SerializeField] private int damage = 1;
     [SerializeField] private GameObject burstFlashPrefab;
+    [SerializeField] private GameObject hellfirePatchPrefab;
 
     private static readonly Collider[] burstHits = new Collider[32];
 
     private float burstRadius;
     private int burstDamage;
+    private float hellfireRadius;
+    private int hellfireDamage;
+    private float hellfireDuration;
 
     public void SetDamage(int amount)
     {
@@ -21,6 +25,13 @@ public class Projectile : MonoBehaviour
     {
         burstRadius = radius;
         burstDamage = amount;
+    }
+
+    public void SetHellfire(float radius, int amount, float duration)
+    {
+        hellfireRadius = radius;
+        hellfireDamage = amount;
+        hellfireDuration = duration;
     }
 
     private void Start()
@@ -50,6 +61,7 @@ public class Projectile : MonoBehaviour
         }
 
         Burst(other);
+        Ignite();
 
         if (damage <= 0) Destroy(gameObject);
     }
@@ -78,5 +90,13 @@ public class Projectile : MonoBehaviour
             Boss boss = hit.GetComponent<Boss>();
             if (boss != null) boss.TakeDamage(burstDamage);
         }
+    }
+
+    private void Ignite()
+    {
+        if (hellfireRadius <= 0f || hellfireDamage <= 0) return;
+
+        Vector3 ground = new Vector3(transform.position.x, 0.02f, transform.position.z);
+        HellfirePatch.Spawn(hellfirePatchPrefab, ground, hellfireRadius, hellfireDamage, hellfireDuration);
     }
 }

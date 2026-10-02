@@ -236,6 +236,9 @@ public class LevelUpScreen : MonoBehaviour
             case UpgradeType.Burst:
                 if (shooter != null) shooter.AddBurst(whole);
                 break;
+            case UpgradeType.Hellfire:
+                if (shooter != null) shooter.AddHellfire(whole);
+                break;
         }
 
         Debug.Log($"Upgrade chosen: {upgrade.title}");

@@ -21,10 +21,18 @@ public class Shooter : MonoBehaviour
     [SerializeField] private float burstRadiusPerLevel = 0.5f;
     [SerializeField] private int burstDamagePerLevel = 1;
 
+    [Header("Hellfire")]
+    [SerializeField] private float hellfireBaseRadius = 1.5f;
+    [SerializeField] private float hellfireRadiusPerLevel = 0.25f;
+    [SerializeField] private int hellfireDamagePerLevel = 1;
+    [SerializeField] private float hellfireBaseDuration = 2f;
+    [SerializeField] private float hellfireDurationPerLevel = 0.5f;
+
     private Crowd crowd;
     private float timer;
     private int volleyCount;
     private int burstLevel;
+    private int hellfireLevel;
 
     public float VolleysPerSecond => 1f / fireInterval;
     public bool IsFireRateMaxed => fireInterval <= minFireInterval + 0.0001f;
@@ -33,6 +41,10 @@ public class Shooter : MonoBehaviour
 
     private float BurstRadius => burstLevel > 0 ? burstBaseRadius + burstRadiusPerLevel * (burstLevel - 1) : 0f;
     private int BurstDamage => burstDamagePerLevel * burstLevel;
+
+    private float HellfireRadius => hellfireLevel > 0 ? hellfireBaseRadius + hellfireRadiusPerLevel * (hellfireLevel - 1) : 0f;
+    private int HellfireDamage => hellfireDamagePerLevel * hellfireLevel;
+    private float HellfireDuration => hellfireLevel > 0 ? hellfireBaseDuration + hellfireDurationPerLevel * (hellfireLevel - 1) : 0f;
 
     public void ImproveFireRate(float fraction)
     {
@@ -54,6 +66,12 @@ public class Shooter : MonoBehaviour
     {
         burstLevel += levels;
         Debug.Log($"Burst level {burstLevel}: radius {BurstRadius:0.0}, damage {BurstDamage}");
+    }
+
+    public void AddHellfire(int levels)
+    {
+        hellfireLevel += levels;
+        Debug.Log($"Hellfire level {hellfireLevel}: radius {HellfireRadius:0.00}, damage {HellfireDamage}, lasts {HellfireDuration:0.0}s");
     }
 
     private void Awake()
@@ -137,6 +155,7 @@ public class Shooter : MonoBehaviour
 
             projectile.SetDamage(shotDamage);
             projectile.SetBurst(BurstRadius, burstDamage);
+            projectile.SetHellfire(HellfireRadius, HellfireDamage, HellfireDuration);
         }
     }
 }
