@@ -150,13 +150,8 @@ public class Hud : MonoBehaviour
     private void AddEntry(List<UpgradeEntry> entries, string label, UpgradeType type,
         bool forceMax, bool alwaysShow)
     {
-        if (levelUpScreen == null || !levelUpScreen.TryGetLevel(type, out int level, out int maxLevel))
-        {
-            if (alwaysShow) entries.Add(new UpgradeEntry { text = $"{label} Lv 1", isMax = false });
-            return;
-        }
-
-        if (!alwaysShow && level < 2) return;
+        if (levelUpScreen == null || !levelUpScreen.TryGetLevel(type, out int level, out int maxLevel)) return;
+        if (level < 1) return;
 
         bool isMax = forceMax || level >= maxLevel;
         string text = isMax ? $"{label} Lv MAX" : $"{label} Lv {level}/{maxLevel}";

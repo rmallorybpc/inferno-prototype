@@ -35,8 +35,8 @@ public class LevelUpScreen : MonoBehaviour
         {
             if (upgrade.type != type || upgrade.maxPicks <= 0) continue;
 
-            level = PicksOf(upgrade) + 1;
-            maxLevel = upgrade.maxPicks + 1;
+            level = PicksOf(upgrade);
+            maxLevel = upgrade.maxPicks;
             return true;
         }
 
@@ -185,7 +185,7 @@ public class LevelUpScreen : MonoBehaviour
     private string CardText(UpgradeData upgrade)
     {
         string rank = upgrade.maxPicks > 0
-            ? $"  Lv {PicksOf(upgrade) + 2}/{upgrade.maxPicks + 1}"
+            ? $"  Lv {PicksOf(upgrade) + 2}/{upgrade.maxPicks}"
             : "";
 
         return $"<b>{upgrade.title}</b>{rank}\n<size=70%>{upgrade.description}</size>";
