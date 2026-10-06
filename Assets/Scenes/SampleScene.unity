@@ -1044,7 +1044,7 @@ MonoBehaviour:
   heroName: Hero
   fontSize: 48
   restartDelay: 1
-  maxUpgradeLines: 2
+  maxUpgradeLines: 3
 --- !u!4 &2060795468
 Transform:
   m_ObjectHideFlags: 0

@@ -185,7 +185,7 @@ public class LevelUpScreen : MonoBehaviour
     private string CardText(UpgradeData upgrade)
     {
         string rank = upgrade.maxPicks > 0
-            ? $"  Lv {PicksOf(upgrade) + 2}/{upgrade.maxPicks}"
+            ? $"  Lv {PicksOf(upgrade) + 1}/{upgrade.maxPicks}"
             : "";
 
         return $"<b>{upgrade.title}</b>{rank}\n<size=70%>{upgrade.description}</size>";
