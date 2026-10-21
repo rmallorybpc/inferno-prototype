@@ -120,6 +120,8 @@ public class Hud : MonoBehaviour
         AddEntry(entries, "Heat", UpgradeType.Damage, false, false);
         AddEntry(entries, "Burst", UpgradeType.Burst, false, false);
         AddEntry(entries, "Hellfire", UpgradeType.Hellfire, false, false);
+        AddEntry(entries, "Burst", UpgradeType.Burst, false, false);
+        AddEntry(entries, "Hellfire", UpgradeType.Hellfire, false, false);
 
         bool[] selected = new bool[entries.Count];
         int shown = 0;

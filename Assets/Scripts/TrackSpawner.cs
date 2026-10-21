@@ -11,15 +11,15 @@ public class TrackSpawner : MonoBehaviour
     [Header("Bosses")]
     [SerializeField] private GameObject bossPrefab;
     [SerializeField] private float[] bossTimes = { 150f, 300f, 450f };
-    [SerializeField] private int bossBaseHealth = 6000;
-    [SerializeField] private float bossHealthGrowth = 2f;
+    [Tooltip("Health for each boss in order. If there are more bosses than entries, the last entry is reused.")]
+    [SerializeField] private int[] bossHealths = { 6000, 24000, 36000 };
     [Tooltip("Must match the Player's forward speed, so boss timing lines up with the clock.")]
     [SerializeField] private float runSpeed = 8f;
 
     [Header("Guardian")]
     [SerializeField] private GameObject guardianPrefab;
     [SerializeField] private float guardianTime = 600f;
-    [SerializeField] private int guardianHealth = 60000;
+    [SerializeField] private int guardianHealth = 150000;
 
     private readonly Queue<Segment> active = new Queue<Segment>();
     private Transform player;
@@ -60,6 +60,12 @@ public class TrackSpawner : MonoBehaviour
         }
     }
 
+    private int BossHealth(int bossIndex)
+    {
+        if (bossHealths == null || bossHealths.Length == 0) return 6000;
+        return bossHealths[Mathf.Min(bossIndex, bossHealths.Length - 1)];
+    }
+
     private void SpawnNext()
     {
         if (guardianPlaced) return;
@@ -86,7 +92,7 @@ public class TrackSpawner : MonoBehaviour
         }
         else if (isBoss)
         {
-            int health = Mathf.RoundToInt(bossBaseHealth * Mathf.Pow(bossHealthGrowth, nextBoss));
+            int health = BossHealth(nextBoss);
             segment.ConfigureBoss(nextIndex, bossPrefab, health);
             Debug.Log($"Boss {nextBoss + 1} placed at segment {nextIndex + 1} with {health} health");
             nextBoss++;
