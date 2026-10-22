@@ -541,12 +541,11 @@ MonoBehaviour:
   - 150
   - 300
   - 450
-  bossBaseHealth: 6000
-  bossHealthGrowth: 2
+  bossHealths: 70170000606d000060ea0000
   runSpeed: 8
   guardianPrefab: {fileID: 653394580442532364, guid: 69d49891ddd3a374f9cbeaa6c1554ac9, type: 3}
   guardianTime: 600
-  guardianHealth: 60000
+  guardianHealth: 500000
 --- !u!4 &694110717
 Transform:
   m_ObjectHideFlags: 0
