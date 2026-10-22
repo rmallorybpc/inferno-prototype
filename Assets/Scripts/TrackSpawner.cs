@@ -12,14 +12,14 @@ public class TrackSpawner : MonoBehaviour
     [SerializeField] private GameObject bossPrefab;
     [SerializeField] private float[] bossTimes = { 150f, 300f, 450f };
     [Tooltip("Health for each boss in order. If there are more bosses than entries, the last entry is reused.")]
-    [SerializeField] private int[] bossHealths = { 6000, 24000, 36000 };
+    [SerializeField] private int[] bossHealths = { 6000, 28000, 60000 };
     [Tooltip("Must match the Player's forward speed, so boss timing lines up with the clock.")]
     [SerializeField] private float runSpeed = 8f;
 
     [Header("Guardian")]
     [SerializeField] private GameObject guardianPrefab;
     [SerializeField] private float guardianTime = 600f;
-    [SerializeField] private int guardianHealth = 150000;
+    [SerializeField] private int guardianHealth = 500000;
 
     private readonly Queue<Segment> active = new Queue<Segment>();
     private Transform player;
